@@ -2,8 +2,8 @@
 (var- num-tests-passed 0)
 
 
-(def- tests @[])
-(def- reports @[])
+(var- tests @[])
+(var- reports @[])
 
 
 (defn- make-report [result]
@@ -17,17 +17,15 @@
   (++ num-tests-run)
   (if passed?
     (++ num-tests-passed))
-  (make-report {:passed? passed? :report report :note note}))
+  (let [summary {:passed? passed? :report report :note note}]
+    (if (empty? reports)
+      summary
+      (make-report summary))))
 
 
 (defn- add-test
   [t]
   (array/push tests t))
-
-
-(defn- run-test
-  [& forms]
-  (do ;forms))
 
 
 (defn- start-report
@@ -67,20 +65,22 @@
 
 (defmacro deftest
   [name & body]
-  # ~(do
-  #    (defn ,name []
-  #      (,start-report ',name)
-  #      (,run-test ,;body))
-  #    (,add-test ,name)))
-  ~(,add-test ,name)
-  ~(defn ,name []
-     (,start-report ',name)
-     (,run-test ,;body)))
+  ~(splice [(defn ,name [] (,start-report ',name) ,;body)
+            (,add-test (or ,name ',name))]))
 
 
 (defn run-tests!
   []
-  (each test tests (test))
+  (each test tests ((or (get (dyn test) :value)
+                        test)))
   (print-report)
   (unless (= num-tests-run num-tests-passed)
     (os/exit 1)))
+
+
+(defn reset-tests!
+  []
+  (set num-tests-run 0)
+  (set num-tests-passed 0)
+  (set tests @[])
+  (set reports @[]))
