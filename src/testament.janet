@@ -67,11 +67,15 @@
 
 (defmacro deftest
   [name & body]
-  ~(do
-     (defn ,name []
-       (,start-report ',name)
-       (,run-test ,;body))
-     (,add-test ,name)))
+  # ~(do
+  #    (defn ,name []
+  #      (,start-report ',name)
+  #      (,run-test ,;body))
+  #    (,add-test ,name)))
+  ~(,add-test ,name)
+  ~(defn ,name []
+     (,start-report ',name)
+     (,run-test ,;body)))
 
 
 (defn run-tests!
