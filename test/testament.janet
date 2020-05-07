@@ -28,7 +28,7 @@
         rule   (string/repeat "-" (length stats))]
     (with-dyns [:out output]
       (run-tests!))
-    (unless (= (string rule "\n" stats "\n" rule "\n") (string output))
+    (unless (= (string "\n" rule "\n" stats "\n" rule "\n") (string output))
       (error "Test failed"))))
 
 

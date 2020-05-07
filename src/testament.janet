@@ -38,13 +38,14 @@
   (each report reports
     (unless (empty? (report :failures))
       (do
-        (print "Failed: " (report :name) "\n")
+        (print "\n> Failed: " (report :name))
         (each failure (report :failures)
           (print "Assertion: " (failure :note))
-          (print (failure :report) "\n")))))
+          (print (failure :report))))))
   (let [stats (string num-tests-run " tests run, "
                       num-tests-passed " tests passed, "
                       (- num-tests-run num-tests-passed) " tests failed")]
+    (print)
     (print (string/repeat "-" (length stats)))
     (print stats)
     (print (string/repeat "-" (length stats)))))
