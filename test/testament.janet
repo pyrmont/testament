@@ -61,3 +61,17 @@
 
 
 (test-reporting)
+
+
+(reset-tests!)
+
+(defn test-reporting-silent []
+  (deftest test-name (assert-equal 1 1))
+  (let [output @""]
+    (with-dyns [:out output]
+      (run-tests! :silent true))
+    (unless (empty? (string output))
+      (error "Test failed"))))
+
+
+(test-reporting-silent)
