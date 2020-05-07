@@ -14,7 +14,7 @@ jobs:
     steps:
     - name: checkout testament
       uses: actions/checkout@v2
-    - name: find latest version of Janet
+    - name: find latest version of janet
       uses: oprypin/find-latest-tag@v1
       with:
         repository: janet-lang/janet
@@ -22,8 +22,12 @@ jobs:
         prefix: 'v'
       id: janet-ver
     - name: download janet
-      run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver.outputs.tag }}/janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
-    - name: extract janet
-      run: tar -xvzf janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
+      run: curl -LO https://github.com/janet-lang/janet/archive/${{ steps.janet-ver.outputs.tag }}.tar.gz
+    - name: extract source
+      run: tar -xvzf ${{ steps.janet-ver.outputs.tag }}.tar.gz
+    - name: build janet
+      run: cd ${{ steps.janet-ver.outputs.tag }} && make && make install
+    - name: change back to testament
+      run: cd ..
     - name: run tests
-      run: ./janet-${{ steps.janet-ver.outputs.tag }}-linux/jpm test
+      run: /usr/bin/env jpm test
