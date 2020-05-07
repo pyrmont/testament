@@ -19,6 +19,7 @@ jobs:
       with:
         repository: janet-lang/janet
         releases_only: true
+        prefix: 'v'
       id: janet-ver
     - name: download janet
       run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver.outputs.tag }}/janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
