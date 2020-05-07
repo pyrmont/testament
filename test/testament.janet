@@ -19,6 +19,15 @@
 (test-assert-equal-macro)
 
 
+(defn test-assert-expr-macro []
+  (let [summary (assert-expr 1)]
+    (unless (= {:passed? true :note "1" :report "Passed"} summary)
+      (error "Test failed"))))
+
+
+(test-assert-expr-macro)
+
+
 (reset-tests!)
 
 (defn test-reporting []
