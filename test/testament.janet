@@ -28,6 +28,24 @@
 (test-assert-expr-macro)
 
 
+(defn test-is-macro-with-value []
+  (let (summary (is 1))
+    (unless (= {:passed? true :note "1" :report "Passed"} summary)
+      (error "Test failed"))))
+
+
+(test-is-macro-with-value)
+
+
+(defn test-is-macro-with-equality []
+  (let (summary (is (= 1 2)))
+    (unless (= {:passed? false :note "2" :report "Expected: 1\nActual: 2"} summary)
+      (error "Test failed"))))
+
+
+(test-is-macro-with-equality)
+
+
 (reset-tests!)
 
 (defn test-reporting []
