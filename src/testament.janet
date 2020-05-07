@@ -1,4 +1,5 @@
 (var- num-tests-run 0)
+(var- num-asserts 0)
 (var- num-tests-passed 0)
 
 
@@ -14,9 +15,7 @@
 
 (defn- review-assertion
   [passed? report note]
-  (++ num-tests-run)
-  (if passed?
-    (++ num-tests-passed))
+  (++ num-asserts)
   (let [summary {:passed? passed? :report report :note note}]
     (if (empty? reports)
       summary
@@ -28,9 +27,16 @@
   (array/push tests t))
 
 
-(defn- start-report
+(defn- start-test
   [name]
+  (++ num-tests-run)
   (array/push reports @{:name name :passes @[] :failures @[]}))
+
+
+(defn- end-test
+  [name]
+  (if (-> (array/peek reports) (get :failures) length zero?)
+    (++ num-tests-passed)))
 
 
 (defn- print-report
@@ -42,13 +48,15 @@
         (each failure (report :failures)
           (print "Assertion: " (failure :note))
           (print (failure :report))))))
-  (let [stats (string num-tests-run " tests run, "
+  (let [stats (string num-tests-run " tests run containing "
+                      num-asserts " assertions\n"
                       num-tests-passed " tests passed, "
-                      (- num-tests-run num-tests-passed) " tests failed")]
+                      (- num-tests-run num-tests-passed) " tests failed")
+        len (->> (string/split "\n" stats) (map length) (splice) (max))]
     (print)
-    (print (string/repeat "-" (length stats)))
+    (print (string/repeat "-" len))
     (print stats)
-    (print (string/repeat "-" (length stats)))))
+    (print (string/repeat "-" len))))
 
 
 (defn- which
@@ -90,7 +98,7 @@
 
 (defmacro deftest
   [name & body]
-  ~(splice [(defn ,name [] (,start-report ',name) ,;body)
+  ~(splice [(defn ,name [] (,start-test ',name) ,;body (,end-test ',name))
             (,add-test (or ,name ',name))]))
 
 
@@ -106,6 +114,7 @@
 (defn reset-tests!
   []
   (set num-tests-run 0)
+  (set num-asserts 0)
   (set num-tests-passed 0)
   (set tests @[])
   (set reports @[]))

@@ -24,8 +24,9 @@
 (defn test-reporting []
   (deftest test-name (assert-equal 1 1))
   (let [output @""
-        stats  "1 tests run, 1 tests passed, 0 tests failed"
-        rule   (string/repeat "-" (length stats))]
+        stats  "1 tests run containing 1 assertions\n1 tests passed, 0 tests failed"
+        len    (->> (string/split "\n" stats) (map length) splice max)
+        rule   (string/repeat "-" len)]
     (with-dyns [:out output]
       (run-tests!))
     (unless (= (string "\n" rule "\n" stats "\n" rule "\n") (string output))
