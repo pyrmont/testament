@@ -103,10 +103,11 @@
 
 
 (defn run-tests!
-  []
+  [&keys {:silent silent}]
   (each test tests ((or (get (dyn test) :value)
                         test)))
-  (print-report)
+  (unless silent
+    (print-report))
   (unless (= num-tests-run num-tests-passed)
     (os/exit 1)))
 
