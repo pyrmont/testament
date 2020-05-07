@@ -12,7 +12,7 @@
 
 (defn test-assert-equal-macro []
   (let [summary (assert-equal 1 1)]
-    (unless (= {:passed? true :note "1" :report "Passed"} summary)
+    (unless (= {:passed? true :note "(= 1 1)" :report "Passed"} summary)
       (error "Test failed"))))
 
 
@@ -39,7 +39,7 @@
 
 (defn test-is-macro-with-equality []
   (let (summary (is (= 1 2)))
-    (unless (= {:passed? false :note "2" :report "Expected: 1\nActual: 2"} summary)
+    (unless (= {:passed? false :note "(= 1 2)" :report "Expected: 1\nActual: 2"} summary)
       (error "Test failed"))))
 
 
