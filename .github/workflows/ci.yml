@@ -23,9 +23,9 @@ jobs:
       id: janet-ver
     - name: download janet
       run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver.outputs.tag }}/janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
-    - name: extract source
+    - name: extract janet
       run: tar -xvzf janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
     - name: add directory to path
-      run: PATH=$PATH:janet-${{ steps.janet-ver.outputs.tag }}-linux
+      run: echo "::add-path::janet-${{ steps.janet-ver.outputs.tag }}-linux"
     - name: run tests
       run: /usr/bin/env jpm test
