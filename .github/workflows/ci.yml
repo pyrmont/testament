@@ -21,8 +21,8 @@ jobs:
         releases_only: true
       id: janet-ver
     - name: download janet
-      run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver }}/janet-${{ steps.janet-ver }}-linux.tar.gz
+      run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver.outputs.tag }}/janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
     - name: extract janet
-      run: tar -xvzf janet-${{ steps.janet-ver }}-linux.tar.gz
+      run: tar -xvzf janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
     - name: run tests
-      run: ./janet-${{ steps.janet-ver }}-linux/jpm test
+      run: ./janet-${{ steps.janet-ver.outputs.tag }}-linux/jpm test
