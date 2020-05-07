@@ -50,6 +50,22 @@
     (print (string/repeat "-" (length stats)))))
 
 
+(defn- which
+  [assertion]
+  (cond
+    (and (tuple? assertion) (= 3 (length assertion)) (= '= (first assertion))) :equal
+    :else :expr))
+
+
+(defmacro assert-expr
+  [expr &opt note]
+  (with-syms [$expr $report $note]
+    ~(let [$expr ,expr
+           $report (if $expr "Passed" "Reason: Result is boolean false")
+           $note (or ,note (string/format "%q" ',expr))]
+      (,review-assertion $expr $report $note))))
+
+
 (defmacro assert-equal
   [expect actual &opt note]
   (with-syms [$expect $actual $result $report $note]
@@ -61,6 +77,14 @@
                                        "Actual: " (string/format "%q" $actual)))
            $note   (or ,note (string/format "%q" ',actual))]
        (,review-assertion $result $report $note))))
+
+
+(defmacro is
+  [assertion &opt note]
+  (case (which assertion)
+    :equal (let [[_ expect actual] assertion]
+             ~(assert-equal ,expect ,actual ,note))
+    :expr ~(assert-expr ,assertion ,note)))
 
 
 (defmacro deftest
