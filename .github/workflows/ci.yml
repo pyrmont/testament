@@ -1,0 +1,28 @@
+name: Janet CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout testament
+      uses: actions/checkout@v2
+    - name: find latest version of Janet
+      uses: oprypin/find-latest-tag@v1
+      with:
+        repository: janet-lang/janet
+        releases_only: true
+      id: janet-ver
+    - name: download janet
+      run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver }}/janet-${{ steps.janet-ver }}-linux.tar.gz
+    - name: extract janet
+      run: tar -xvzf janet-${{ steps.janet-ver }}-linux.tar.gz
+    - name: run tests
+      run: ./janet-${{ steps.janet-ver }}-linux/jpm test
