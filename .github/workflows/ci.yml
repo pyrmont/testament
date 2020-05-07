@@ -26,7 +26,7 @@ jobs:
     - name: extract source
       run: tar -xvzf ${{ steps.janet-ver.outputs.tag }}.tar.gz
     - name: build janet
-      run: cd ${{ steps.janet-ver.outputs.tag }} && make && make install
+      run: cd janet* && make && make install
     - name: change back to testament
       run: cd ..
     - name: run tests
