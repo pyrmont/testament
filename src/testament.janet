@@ -69,9 +69,9 @@
 (defmacro assert-expr
   [expr &opt note]
   (with-syms [$expr $report $note]
-    ~(let [$expr (not (not ,expr))
+    ~(let [$expr   (not (not ,expr))
            $report (if $expr "Passed" "Reason: Result is Boolean false")
-           $note (or ,note (string/format "%q" ',expr))]
+           $note   (or ,note (string/format "%q" ',expr))]
       (,review-assertion $expr $report $note))))
 
 
@@ -84,7 +84,7 @@
            $report (if $result "Passed"
                                (string "Expected: " (string/format "%q\n" $expect)
                                        "Actual: " (string/format "%q" $actual)))
-           $note   (or ,note (string/format "%q" ',actual))]
+           $note   (or ,note (string/format "(= %q %q)" ',expect ',actual))]
        (,review-assertion $result $report $note))))
 
 
