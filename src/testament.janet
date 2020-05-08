@@ -62,10 +62,11 @@
 
 ### Test utility functions
 
-(defn- add-test
-  "Add a test to the test suite"
+(defn- register-test
+  "Register a test with the test suite"
   [t]
-  (array/push tests t))
+  (array/push tests t)
+  t)
 
 
 (defn- setup-test
@@ -164,10 +165,10 @@
   produced by this macro but with respective setup and teardown steps inserted
   before and after the forms in `body` are called."
   [name & body]
-  # This is a hack. Depending on the scope in which `deftest` is called, it may
-  # or may not have be possible to register the test function itself.
-  ~(splice [(defn ,name [] (,setup-test ',name) ,;body (,teardown-test ',name))
-            (,add-test (or ,name ',name))]))
+  ~(def ,name (,register-test (fn []
+                                (,setup-test ',name)
+                                ,;body
+                                (,teardown-test ',name)))))
 
 
 ### Test suite functions
@@ -178,12 +179,7 @@
   Acceptions an optional `:silent` argument that will omit any reports being
   printed."
   [&keys {:silent silent}]
-  # This is a hack. Depending on the scope in which `deftest` is called, it may
-  # or may not have been possible to register the test function itself. If only
-  # the symbol was registered, that must be used to retrieve the function using
-  # `dyn`
-  (each test tests ((or (get (dyn test) :value)
-                        test)))
+  (each test tests (test))
   (unless silent
     (print-reports))
   (unless (= num-tests-run num-tests-passed)
