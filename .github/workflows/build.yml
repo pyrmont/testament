@@ -1,4 +1,4 @@
-name: Janet CI
+name: build
 
 on:
   push:
