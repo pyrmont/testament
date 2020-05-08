@@ -1,45 +1,25 @@
+### testament: a testing library for Janet
+
+## by Michael Camilleri
+## 8 May 2020
+
+## Thanks to Sean Walker (for tester) and to Stuart Sierra (for clojure.test),
+## both of which served as inspirations.
+
+
+### Globals used by the reporting functions
+
 (var- num-tests-run 0)
 (var- num-asserts 0)
 (var- num-tests-passed 0)
-
-
 (var- tests @[])
 (var- reports @[])
 
 
-(defn- make-report [result]
-  (let [latest (last reports)
-        queue  (if (result :passed?) (latest :passes) (latest :failures))]
-    (array/push queue result)))
+### Reporting functions
 
-
-(defn- review-assertion
-  [passed? report note]
-  (++ num-asserts)
-  (let [summary {:passed? passed? :report report :note note}]
-    (if (empty? reports)
-      summary
-      (make-report summary))))
-
-
-(defn- add-test
-  [t]
-  (array/push tests t))
-
-
-(defn- start-test
-  [name]
-  (++ num-tests-run)
-  (array/push reports @{:name name :passes @[] :failures @[]}))
-
-
-(defn- end-test
-  [name]
-  (if (-> (array/peek reports) (get :failures) length zero?)
-    (++ num-tests-passed)))
-
-
-(defn- print-report
+(defn- print-reports
+  "Print reports"
   []
   (each report reports
     (unless (empty? (report :failures))
@@ -52,30 +32,95 @@
                       num-asserts " assertions\n"
                       num-tests-passed " tests passed, "
                       (- num-tests-run num-tests-passed) " tests failed")
-        len (->> (string/split "\n" stats) (map length) (splice) (max))]
+        len   (->> (string/split "\n" stats) (map length) (splice) (max))]
     (print)
     (print (string/repeat "-" len))
     (print stats)
     (print (string/repeat "-" len))))
 
 
-(defn- which
-  [assertion]
-  (cond
-    (and (tuple? assertion) (= 3 (length assertion)) (= '= (first assertion))) :equal
-    :else :expr))
+(defn- add-to-report
+  "Add result to the current report
 
+  The current report is the last report created. Behaviour is undefined if tests
+  are run in parallel or concurrently."
+  [result]
+  (let [latest (last reports)
+        queue  (if (result :passed?) (latest :passes) (latest :failures))]
+    (array/push queue result)))
+
+
+(defn- compose-and-record-result
+  "Compose a result and record it if applicable"
+  [passed? report note]
+  (++ num-asserts)
+  (let [result {:passed? passed? :report report :note note}]
+    (when (not (empty? reports))
+      (add-to-report result))
+    result))
+
+
+### Test utility functions
+
+(defn- add-test
+  "Add a test to the test suite"
+  [t]
+  (array/push tests t))
+
+
+(defn- setup-test
+  "Perform tasks to setup the test, `name`"
+  [name]
+  (++ num-tests-run)
+  (array/push reports @{:name name :passes @[] :failures @[]}))
+
+
+(defn- teardown-test
+  "Perform tasks to teardown the test, `name`"
+  [name]
+  (if (-> (array/peek reports) (get :failures) length zero?)
+    (++ num-tests-passed)))
+
+
+### Utility function
+
+(defn- which
+  "Determine the type of assertion being performed"
+  [assertion]
+  (cond (and (tuple? assertion) (= 3 (length assertion)) (= '= (first assertion)))
+        :equal
+
+        :else
+        :expr))
+
+
+### Assertion macros
 
 (defmacro assert-expr
+  "Assert that the expression, `expr`, is true (with an optional `note`)
+
+  The `assert-expr` macro provides a mechanism for creating a generic assertion.
+
+  An optional `note` can be included that will be used in any failure report to
+  identify the assertion. If no `note` is provided, the form of `expr` is used."
   [expr &opt note]
   (with-syms [$expr $report $note]
     ~(let [$expr   (not (not ,expr))
            $report (if $expr "Passed" "Reason: Result is Boolean false")
            $note   (or ,note (string/format "%q" ',expr))]
-      (,review-assertion $expr $report $note))))
+      (,compose-and-record-result $expr $report $note))))
 
 
 (defmacro assert-equal
+  "Assert that `expect` is equal to `actual` (with an optional `note`)
+
+  The `assert-equal` macro provides a mechanism for creating an assertion that
+  an expected result is equal to the actual result. The forms of `expect` and
+  `actual` will be used in the output of any failure report.
+
+  An optional `note` can be included that will be used in any failure report to
+  identify the assertion. If no `note` is provided, the form `(= expect actual)`
+  is used."
   [expect actual &opt note]
   (with-syms [$expect $actual $result $report $note]
     ~(let [$expect ,expect
@@ -85,10 +130,24 @@
                                (string "Expected: " (string/format "%q\n" $expect)
                                        "Actual: " (string/format "%q" $actual)))
            $note   (or ,note (string/format "(= %q %q)" ',expect ',actual))]
-       (,review-assertion $result $report $note))))
+       (,compose-and-record-result $result $report $note))))
 
 
 (defmacro is
+  "Assert that an `assertion` is true (with an optional `note`)
+
+  The `is` macro provides a succinct mechanism for creating assertions.
+  Testament includes support for two types of assertions:
+
+  1. a generic assertion that asserts the Boolean truth of an expression; and
+  2. an equality assertion that asserts that an expected result and an actual
+     result are equal.
+
+  `is` causes the appropriate assertion to be inserted based on the form of the
+  asserted expression.
+
+  An optional `note` can be included that will be used in any failure report to
+  identify the assertion."
   [assertion &opt note]
   (case (which assertion)
     :equal (let [[_ expect actual] assertion]
@@ -96,23 +155,43 @@
     :expr ~(assert-expr ,assertion ,note)))
 
 
+### Test definition macro
+
 (defmacro deftest
+  "Define a test, `name`, and register it in the suite
+
+  A test is just a function. The `body` is used as the body of the function
+  produced by this macro but with respective setup and teardown steps inserted
+  before and after the forms in `body` are called."
   [name & body]
-  ~(splice [(defn ,name [] (,start-test ',name) ,;body (,end-test ',name))
+  # This is a hack. Depending on the scope in which `deftest` is called, it may
+  # or may not have be possible to register the test function itself.
+  ~(splice [(defn ,name [] (,setup-test ',name) ,;body (,teardown-test ',name))
             (,add-test (or ,name ',name))]))
 
 
+### Test suite functions
+
 (defn run-tests!
+  "Run the registered tests
+
+  Acceptions an optional `:silent` argument that will omit any reports being
+  printed."
   [&keys {:silent silent}]
+  # This is a hack. Depending on the scope in which `deftest` is called, it may
+  # or may not have been possible to register the test function itself. If only
+  # the symbol was registered, that must be used to retrieve the function using
+  # `dyn`
   (each test tests ((or (get (dyn test) :value)
                         test)))
   (unless silent
-    (print-report))
+    (print-reports))
   (unless (= num-tests-run num-tests-passed)
     (os/exit 1)))
 
 
 (defn reset-tests!
+  "Reset all reporting variables"
   []
   (set num-tests-run 0)
   (set num-asserts 0)
