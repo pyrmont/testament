@@ -47,6 +47,5 @@ the [Issues][] section on GitHub.
 ## Licence
 
 Testament is licensed under the MIT Licence. See [LICENSE][] for more details.
-details.
 
 [LICENSE]: https://github.com/pyrmont/testament/blob/master/LICENSE
