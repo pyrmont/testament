@@ -19,7 +19,9 @@
 ### Reporting functions
 
 (defn- print-reports
-  "Print reports"
+  ```
+  Print reports
+  ```
   []
   (each report reports
     (unless (empty? (report :failures))
@@ -40,10 +42,12 @@
 
 
 (defn- add-to-report
-  "Add result to the current report
+  ```
+  Add result to the current report
 
   The current report is the last report created. Behaviour is undefined if tests
-  are run in parallel or concurrently."
+  are run in parallel or concurrently.
+  ```
   [result]
   (let [latest (last reports)
         queue  (if (result :passed?) (latest :passes) (latest :failures))]
@@ -51,7 +55,9 @@
 
 
 (defn- compose-and-record-result
-  "Compose a result and record it if applicable"
+  ```
+  Compose a result and record it if applicable
+  ```
   [passed? report note]
   (++ num-asserts)
   (let [result {:passed? passed? :report report :note note}]
@@ -63,21 +69,27 @@
 ### Test utility functions
 
 (defn- register-test
-  "Register a test with the test suite"
+  ```
+  Register a test with the test suite
+  ```
   [t]
   (array/push tests t)
   t)
 
 
 (defn- setup-test
-  "Perform tasks to setup the test, `name`"
+  ```
+  Perform tasks to setup the test, `name`
+  ```
   [name]
   (++ num-tests-run)
   (array/push reports @{:name name :passes @[] :failures @[]}))
 
 
 (defn- teardown-test
-  "Perform tasks to teardown the test, `name`"
+  ```
+  Perform tasks to teardown the test, `name`
+  ```
   [name]
   (if (-> (array/peek reports) (get :failures) length zero?)
     (++ num-tests-passed)))
@@ -86,7 +98,9 @@
 ### Utility function
 
 (defn- which
-  "Determine the type of assertion being performed"
+  ```
+  Determine the type of assertion being performed
+  ```
   [assertion]
   (cond (and (tuple? assertion) (= 3 (length assertion)) (= '= (first assertion)))
         :equal
@@ -98,12 +112,14 @@
 ### Assertion macros
 
 (defmacro assert-expr
-  "Assert that the expression, `expr`, is true (with an optional `note`)
+  ```
+  Assert that the expression, `expr`, is true (with an optional `note`)
 
   The `assert-expr` macro provides a mechanism for creating a generic assertion.
 
   An optional `note` can be included that will be used in any failure report to
-  identify the assertion. If no `note` is provided, the form of `expr` is used."
+  identify the assertion. If no `note` is provided, the form of `expr` is used.
+  ```
   [expr &opt note]
   (with-syms [$expr $report $note]
     ~(let [$expr   (not (not ,expr))
@@ -113,7 +129,8 @@
 
 
 (defmacro assert-equal
-  "Assert that `expect` is equal to `actual` (with an optional `note`)
+  ```
+  Assert that `expect` is equal to `actual` (with an optional `note`)
 
   The `assert-equal` macro provides a mechanism for creating an assertion that
   an expected result is equal to the actual result. The forms of `expect` and
@@ -121,7 +138,8 @@
 
   An optional `note` can be included that will be used in any failure report to
   identify the assertion. If no `note` is provided, the form `(= expect actual)`
-  is used."
+  is used.
+  ```
   [expect actual &opt note]
   (with-syms [$expect $actual $result $report $note]
     ~(let [$expect ,expect
@@ -135,7 +153,8 @@
 
 
 (defmacro is
-  "Assert that an `assertion` is true (with an optional `note`)
+  ```
+  Assert that an `assertion` is true (with an optional `note`)
 
   The `is` macro provides a succinct mechanism for creating assertions.
   Testament includes support for two types of assertions:
@@ -148,7 +167,8 @@
   asserted expression.
 
   An optional `note` can be included that will be used in any failure report to
-  identify the assertion."
+  identify the assertion.
+  ```
   [assertion &opt note]
   (case (which assertion)
     :equal (let [[_ expect actual] assertion]
@@ -159,11 +179,13 @@
 ### Test definition macro
 
 (defmacro deftest
-  "Define a test, `name`, and register it in the suite
+  ```
+  Define a test, `name`, and register it in the suite
 
   A test is just a function. The `body` is used as the body of the function
   produced by this macro but with respective setup and teardown steps inserted
-  before and after the forms in `body` are called."
+  before and after the forms in `body` are called.
+  ```
   [name & body]
   ~(def ,name (,register-test (fn []
                                 (,setup-test ',name)
@@ -174,10 +196,12 @@
 ### Test suite functions
 
 (defn run-tests!
-  "Run the registered tests
+  ```
+  Run the registered tests
 
   Acceptions an optional `:silent` argument that will omit any reports being
-  printed."
+  printed.
+  ```
   [&keys {:silent silent}]
   (each test tests (test))
   (unless silent
@@ -187,7 +211,9 @@
 
 
 (defn reset-tests!
-  "Reset all reporting variables"
+  ```
+  Reset all reporting variables
+  ```
   []
   (set num-tests-run 0)
   (set num-asserts 0)
