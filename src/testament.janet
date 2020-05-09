@@ -112,6 +112,9 @@
 ### Function form of assertion macros
 
 (defn- assert-expr*
+  ```
+  Function form of assert-expr
+  ```
   [expr form note]
   (let [expr   (not (not expr))
         report (if expr "Passed" "Reason: Result is Boolean false")
@@ -120,6 +123,9 @@
 
 
 (defn- assert-equal*
+  ```
+  Function form of assert-equal
+  ```
   [expect expect-form actual actual-form note]
   (let [result (= expect actual)
         report (if result "Passed"
