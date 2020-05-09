@@ -109,6 +109,26 @@
         :expr))
 
 
+### Function form of assertion macros
+
+(defn- assert-expr*
+  [expr form note]
+  (let [expr   (not (not expr))
+        report (if expr "Passed" "Reason: Result is Boolean false")
+        note   (or note (string/format "%q" form))]
+   (compose-and-record-result expr report note)))
+
+
+(defn- assert-equal*
+  [expect expect-form actual actual-form note]
+  (let [result (= expect actual)
+        report (if result "Passed"
+                          (string "Expected: " (string/format "%q\n" expect-form)
+                                  "Actual: " (string/format "%q" actual-form)))
+        note   (or note (string/format "(= %q %q)" expect-form actual-form))]
+    (compose-and-record-result result report note)))
+
+
 ### Assertion macros
 
 (defmacro assert-expr
@@ -121,11 +141,7 @@
   identify the assertion. If no `note` is provided, the form of `expr` is used.
   ```
   [expr &opt note]
-  (with-syms [$expr $report $note]
-    ~(let [$expr   (not (not ,expr))
-           $report (if $expr "Passed" "Reason: Result is Boolean false")
-           $note   (or ,note (string/format "%q" ',expr))]
-      (,compose-and-record-result $expr $report $note))))
+  ~(,assert-expr* ,expr ',expr ,note))
 
 
 (defmacro assert-equal
@@ -141,15 +157,7 @@
   is used.
   ```
   [expect actual &opt note]
-  (with-syms [$expect $actual $result $report $note]
-    ~(let [$expect ,expect
-           $actual ,actual
-           $result (,= $expect $actual)
-           $report (if $result "Passed"
-                               (string "Expected: " (string/format "%q\n" $expect)
-                                       "Actual: " (string/format "%q" $actual)))
-           $note   (or ,note (string/format "(= %q %q)" ',expect ',actual))]
-       (,compose-and-record-result $result $report $note))))
+  ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
 
 
 (defmacro is
@@ -172,8 +180,8 @@
   [assertion &opt note]
   (case (which assertion)
     :equal (let [[_ expect actual] assertion]
-             ~(assert-equal ,expect ,actual ,note))
-    :expr ~(assert-expr ,assertion ,note)))
+             ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
+    :expr ~(,assert-expr* ,assertion ',assertion ,note)))
 
 
 ### Test definition macro
