@@ -4,8 +4,8 @@
 [`testament/assert-expr`](#testamentassert-expr),
 [`testament/deftest`](#testamentdeftest),
 [`testament/is`](#testamentis),
-[`testament/reset-tests!`](#testamentreset-tests!),
-[`testament/run-tests!`](#testamentrun-tests!)
+[`testament/reset-tests!`](#testamentreset-tests),
+[`testament/run-tests!`](#testamentrun-tests)
 
 ## testament/assert-equal
 
@@ -25,7 +25,7 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[s1]: https://github.com/pyrmont/testament/blob/master/src/testament.janet#L153
+[s1]: src/testament.janet#L153
 
 
 ## testament/assert-expr
@@ -43,7 +43,7 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[s2]: https://github.com/pyrmont/testament/blob/master/src/testament.janet#L140
+[s2]: src/testament.janet#L140
 
 
 ## testament/deftest
@@ -60,7 +60,7 @@ A test is just a function. The `body` is used as the body of the function
 produced by this macro but with respective setup and teardown steps inserted
 before and after the forms in `body` are called.
 
-[s3]: https://github.com/pyrmont/testament/blob/master/src/testament.janet#L195
+[s3]: src/testament.janet#L195
 
 
 ## testament/is
@@ -86,7 +86,7 @@ asserted expression.
 An optional `note` can be included that will be used in any failure report to
 identify the assertion.
 
-[s4]: https://github.com/pyrmont/testament/blob/master/src/testament.janet#L169
+[s4]: src/testament.janet#L169
 
 
 ## testament/reset-tests!
@@ -99,7 +99,7 @@ identify the assertion.
 
 Reset all reporting variables
 
-[s5]: https://github.com/pyrmont/testament/blob/master/src/testament.janet#L227
+[s5]: src/testament.janet#L227
 
 
 ## testament/run-tests!
@@ -115,4 +115,4 @@ Run the registered tests
 Acceptions an optional `:silent` argument that will omit any reports being
 printed.
 
-[s6]: https://github.com/pyrmont/testament/blob/master/src/testament.janet#L212
+[s6]: src/testament.janet#L212
