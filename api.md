@@ -112,7 +112,7 @@ Reset all reporting variables
 
 Run the registered tests
 
-Acceptions an optional `:silent` argument that will omit any reports being
+Accepts an optional `:silent` argument that will omit any reports being
 printed.
 
 [s6]: src/testament.janet#L212
