@@ -2,6 +2,7 @@
 
 [`testament/assert-equal`](#testamentassert-equal),
 [`testament/assert-expr`](#testamentassert-expr),
+[`testament/assert-thrown`](#testamentassert-thrown),
 [`testament/deftest`](#testamentdeftest),
 [`testament/is`](#testamentis),
 [`testament/reset-tests!`](#testamentreset-tests),
@@ -25,7 +26,7 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[s1]: src/testament.janet#L153
+[s1]: src/testament.janet#L167
 
 
 ## testament/assert-expr
@@ -43,12 +44,32 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[s2]: src/testament.janet#L140
+[s2]: src/testament.janet#L154
+
+
+## testament/assert-thrown
+
+**macro** | [source][s3]
+
+```
+(assert-thrown form &opt note)
+```
+
+Assert that the expression, `expr`, threw an error (with an optional `note`)
+
+The `assert-thrown` macro provides a mechanism for creating an assertion that
+an expression threw an error.
+
+An optional `note` can be included that will be used in any failure report to
+identify the assertion. If no `note` is provided, the form `thrown? expr` is
+used.
+
+[s3]: src/testament.janet#L183
 
 
 ## testament/deftest
 
-**macro** | [source][s3]
+**macro** | [source][s4]
 
 ```
 (deftest name & body)
@@ -60,12 +81,12 @@ A test is just a function. The `body` is used as the body of the function
 produced by this macro but with respective setup and teardown steps inserted
 before and after the forms in `body` are called.
 
-[s3]: src/testament.janet#L195
+[s4]: src/testament.janet#L229
 
 
 ## testament/is
 
-**macro** | [source][s4]
+**macro** | [source][s5]
 
 ```
 (is assertion &opt note)
@@ -74,11 +95,12 @@ before and after the forms in `body` are called.
 Assert that an `assertion` is true (with an optional `note`)
 
 The `is` macro provides a succinct mechanism for creating assertions.
-Testament includes support for two types of assertions:
+Testament includes support for three types of assertions:
 
-1. a generic assertion that asserts the Boolean truth of an expression; and
+1. a generic assertion that asserts the Boolean truth of an expression;
 2. an equality assertion that asserts that an expected result and an actual
-   result are equal.
+   result are equal;
+3. an assertion that an error will be thrown.
 
 `is` causes the appropriate assertion to be inserted based on the form of the
 asserted expression.
@@ -86,12 +108,12 @@ asserted expression.
 An optional `note` can be included that will be used in any failure report to
 identify the assertion.
 
-[s4]: src/testament.janet#L169
+[s5]: src/testament.janet#L199
 
 
 ## testament/reset-tests!
 
-**function** | [source][s5]
+**function** | [source][s6]
 
 ```
 (reset-tests!)
@@ -99,12 +121,12 @@ identify the assertion.
 
 Reset all reporting variables
 
-[s5]: src/testament.janet#L227
+[s6]: src/testament.janet#L261
 
 
 ## testament/run-tests!
 
-**function** | [source][s6]
+**function** | [source][s7]
 
 ```
 (run-tests! &keys {:silent silent})
@@ -115,4 +137,4 @@ Run the registered tests
 Accepts an optional `:silent` argument that will omit any reports being
 printed.
 
-[s6]: src/testament.janet#L212
+[s7]: src/testament.janet#L246

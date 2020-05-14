@@ -182,10 +182,10 @@
 
 (defmacro assert-thrown
   ```
-  Assert that the expression, `expr`, thrown an error (with an optional `note`)
+  Assert that the expression, `expr`, threw an error (with an optional `note`)
 
   The `assert-thrown` macro provides a mechanism for creating an assertion that
-  an expression thrown an error.
+  an expression threw an error.
 
   An optional `note` can be included that will be used in any failure report to
   identify the assertion. If no `note` is provided, the form `thrown? expr` is
@@ -206,7 +206,7 @@
   1. a generic assertion that asserts the Boolean truth of an expression;
   2. an equality assertion that asserts that an expected result and an actual
      result are equal;
-  3. an assertion that an error has been thrown.
+  3. an assertion that an error will be thrown.
 
   `is` causes the appropriate assertion to be inserted based on the form of the
   asserted expression.
