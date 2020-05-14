@@ -11,15 +11,6 @@
 (test-deftest-macro)
 
 
-(defn test-assert-equal-macro []
-  (let [summary (t/assert-equal 1 1)]
-    (unless (= {:passed? true :note "(= 1 1)" :report "Passed"} summary)
-      (error "Test failed"))))
-
-
-(test-assert-equal-macro)
-
-
 (defn test-assert-expr-macro []
   (let [summary (t/assert-expr 1)]
     (unless (= {:passed? true :note "1" :report "Passed"} summary)
@@ -27,6 +18,15 @@
 
 
 (test-assert-expr-macro)
+
+
+(defn test-assert-equal-macro []
+  (let [summary (t/assert-equal 1 1)]
+    (unless (= {:passed? true :note "(= 1 1)" :report "Passed"} summary)
+      (error "Test failed"))))
+
+
+(test-assert-equal-macro)
 
 
 (defn test-is-macro-with-value []
