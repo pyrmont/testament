@@ -106,6 +106,9 @@
     (and (tuple? assertion) (= 3 (length assertion)) (= '= (first assertion)))
     :equal
 
+    (and (tuple? assertion) (= 2 (length assertion)) (= 'thrown? (first assertion)))
+    :thrown
+
     :else
     :expr))
 
@@ -134,6 +137,16 @@
                                   "Actual: " (string/format "%q" actual)))
         note   (or note (string/format "(= %q %q)" expect-form actual-form))]
     (compose-and-record-result result report note)))
+
+
+(defn- assert-thrown*
+  ```
+  Function form of assert-thrown
+  ```
+  [thrown? form note]
+  (let [report (if thrown? "Passed" "Reason: No error thrown")
+        note   (or note (string/format "thrown? %q" form))]
+    (compose-and-record-result thrown? report note)))
 
 
 ### Assertion macros
@@ -167,16 +180,33 @@
   ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
 
 
+(defmacro assert-thrown
+  ```
+  Assert that the expression, `expr`, thrown an error (with an optional `note`)
+
+  The `assert-thrown` macro provides a mechanism for creating an assertion that
+  an expression thrown an error.
+
+  An optional `note` can be included that will be used in any failure report to
+  identify the assertion. If no `note` is provided, the form `thrown? expr` is
+  used.
+  ```
+  [form &opt note]
+  (let [errsym (keyword (gensym))]
+    ~(,assert-thrown* (= ,errsym (try ,form ([_] ,errsym))) ',form ,note)))
+
+
 (defmacro is
   ```
   Assert that an `assertion` is true (with an optional `note`)
 
   The `is` macro provides a succinct mechanism for creating assertions.
-  Testament includes support for two types of assertions:
+  Testament includes support for three types of assertions:
 
-  1. a generic assertion that asserts the Boolean truth of an expression; and
+  1. a generic assertion that asserts the Boolean truth of an expression;
   2. an equality assertion that asserts that an expected result and an actual
-     result are equal.
+     result are equal;
+  3. an assertion that an error has been thrown.
 
   `is` causes the appropriate assertion to be inserted based on the form of the
   asserted expression.
@@ -188,6 +218,9 @@
   (case (which assertion)
     :equal (let [[_ expect actual] assertion]
              ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
+    :thrown (let [[_ form] assertion
+                  errsym   (keyword (gensym))]
+               ~(,assert-thrown* (= ,errsym (try ,form ([_] ,errsym))) ',form ,note))
     :expr ~(,assert-expr* ,assertion ',assertion ,note)))
 
 
