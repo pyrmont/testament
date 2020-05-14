@@ -102,11 +102,12 @@
   Determine the type of assertion being performed
   ```
   [assertion]
-  (cond (and (tuple? assertion) (= 3 (length assertion)) (= '= (first assertion)))
-        :equal
+  (cond
+    (and (tuple? assertion) (= 3 (length assertion)) (= '= (first assertion)))
+    :equal
 
-        :else
-        :expr))
+    :else
+    :expr))
 
 
 ### Function form of assertion macros
