@@ -1,18 +1,19 @@
 # Testament API
 
-[`testament/assert-equal`](#testamentassert-equal),
-[`testament/assert-expr`](#testamentassert-expr),
-[`testament/assert-thrown`](#testamentassert-thrown),
-[`testament/deftest`](#testamentdeftest),
-[`testament/is`](#testamentis),
-[`testament/reset-tests!`](#testamentreset-tests),
-[`testament/run-tests!`](#testamentrun-tests)
+[testament/assert-equal](#testamentassert-equal)
+, [testament/assert-expr](#testamentassert-expr)
+, [testament/assert-thrown](#testamentassert-thrown)
+, [testament/deftest](#testamentdeftest)
+, [testament/is](#testamentis)
+, [testament/reset-tests!](#testamentreset-tests)
+, [testament/run-tests!](#testamentrun-tests)
+
 
 ## testament/assert-equal
 
-**macro** | [source][s1]
+**macro**  | [source][1]
 
-```
+```janet
 (assert-equal expect actual &opt note)
 ```
 
@@ -26,14 +27,14 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[s1]: src/testament.janet#L167
+[1]: src/testament.janet#L167
 
 
 ## testament/assert-expr
 
-**macro** | [source][s2]
+**macro**  | [source][2]
 
-```
+```janet
 (assert-expr expr &opt note)
 ```
 
@@ -44,14 +45,14 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[s2]: src/testament.janet#L154
+[2]: src/testament.janet#L154
 
 
 ## testament/assert-thrown
 
-**macro** | [source][s3]
+**macro**  | [source][3]
 
-```
+```janet
 (assert-thrown form &opt note)
 ```
 
@@ -64,14 +65,14 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form `thrown? expr` is
 used.
 
-[s3]: src/testament.janet#L183
+[3]: src/testament.janet#L183
 
 
 ## testament/deftest
 
-**macro** | [source][s4]
+**macro**  | [source][4]
 
-```
+```janet
 (deftest name & body)
 ```
 
@@ -81,14 +82,14 @@ A test is just a function. The `body` is used as the body of the function
 produced by this macro but with respective setup and teardown steps inserted
 before and after the forms in `body` are called.
 
-[s4]: src/testament.janet#L229
+[4]: src/testament.janet#L229
 
 
 ## testament/is
 
-**macro** | [source][s5]
+**macro**  | [source][5]
 
-```
+```janet
 (is assertion &opt note)
 ```
 
@@ -108,27 +109,27 @@ asserted expression.
 An optional `note` can be included that will be used in any failure report to
 identify the assertion.
 
-[s5]: src/testament.janet#L199
+[5]: src/testament.janet#L199
 
 
 ## testament/reset-tests!
 
-**function** | [source][s6]
+**function**  | [source][6]
 
-```
+```janet
 (reset-tests!)
 ```
 
 Reset all reporting variables
 
-[s6]: src/testament.janet#L261
+[6]: src/testament.janet#L261
 
 
 ## testament/run-tests!
 
-**function** | [source][s7]
+**function**  | [source][7]
 
-```
+```janet
 (run-tests! &keys {:silent silent})
 ```
 
@@ -137,4 +138,6 @@ Run the registered tests
 Accepts an optional `:silent` argument that will omit any reports being
 printed.
 
-[s7]: src/testament.janet#L246
+[7]: src/testament.janet#L246
+
+
