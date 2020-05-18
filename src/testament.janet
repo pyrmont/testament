@@ -156,10 +156,10 @@
   ```
   Function form of assert-thrown-message
   ```
-  [thrown? form actual expect note]
+  [thrown? form expect actual note]
   (let [report (if thrown? "Passed"
-                           (string "Expected: Error with message " (string/format "%q\n" expect)
-                                   "Actual: Error with message " (string/format "%q" actual)))
+                           (string "Expect: Error message " (string/format "%q\n" expect)
+                                   "Actual: Error message " (string/format "%q" actual)))
         note   (or note (string/format "thrown? %q %q" expect form))]
     (compose-and-record-result thrown? report note)))
 
