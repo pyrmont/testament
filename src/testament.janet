@@ -109,6 +109,9 @@
     (and (tuple? assertion) (= 2 (length assertion)) (= 'thrown? (first assertion)))
     :thrown
 
+    (and (tuple? assertion) (= 3 (length assertion)) (= 'thrown? (first assertion)))
+    :thrown-message
+
     :else
     :expr))
 
@@ -146,6 +149,18 @@
   [thrown? form note]
   (let [report (if thrown? "Passed" "Reason: No error thrown")
         note   (or note (string/format "thrown? %q" form))]
+    (compose-and-record-result thrown? report note)))
+
+
+(defn- assert-thrown-message*
+  ```
+  Function form of assert-thrown-message
+  ```
+  [thrown? form actual expect note]
+  (let [report (if thrown? "Passed"
+                           (string "Expected: Error with message " (string/format "%q\n" expect)
+                                   "Actual: Error with message " (string/format "%q" actual)))
+        note   (or note (string/format "thrown? %q %q" expect form))]
     (compose-and-record-result thrown? report note)))
 
 
@@ -188,12 +203,32 @@
   an expression threw an error.
 
   An optional `note` can be included that will be used in any failure report to
-  identify the assertion. If no `note` is provided, the form `thrown? expr` is
+  identify the assertion. If no `note` is provided, the form `thrown? form` is
   used.
   ```
   [form &opt note]
   (let [errsym (keyword (gensym))]
     ~(,assert-thrown* (= ,errsym (try ,form ([_] ,errsym))) ',form ,note)))
+
+
+(defmacro assert-thrown-message
+  ```
+  Assert that the expression, `expr`, threw an error with the message `expect`
+  (with an optional `note`)
+
+  The `assert-thrown` macro provides a mechanism for creating an assertion that
+  an expression threw an error with the specified message.
+
+  An optional `note` can be included that will be used in any failure report to
+  identify the assertion. If no `note` is provided, the form
+  `thrown? expect form` is used.
+  ```
+  [expect form &opt note]
+  (let [errsym   (keyword (gensym))
+        sentinel (gensym)
+        actual   (gensym)]
+    ~(let [[,sentinel ,actual] (try (do ,form [nil nil]) ([err] [,errsym err]))]
+      (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',form ,expect ,actual ,note))))
 
 
 (defmacro is
@@ -216,12 +251,26 @@
   ```
   [assertion &opt note]
   (case (which assertion)
-    :equal (let [[_ expect actual] assertion]
-             ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
-    :thrown (let [[_ form] assertion
-                  errsym   (keyword (gensym))]
-               ~(,assert-thrown* (= ,errsym (try ,form ([_] ,errsym))) ',form ,note))
-    :expr ~(,assert-expr* ,assertion ',assertion ,note)))
+    :equal
+    (let [[_ expect actual] assertion]
+      ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
+
+    :thrown
+    (let [[_ form] assertion
+          errsym   (keyword (gensym))]
+      ~(,assert-thrown* (= ,errsym (try ,form ([_] ,errsym))) ',form ,note))
+
+    :thrown-message
+    (let [[_ expect form] assertion
+          errsym   (keyword (gensym))
+          sentinel (gensym)
+          actual   (gensym)]
+      ~(let [[,sentinel ,actual] (try (do ,form [nil nil]) ([err] [,errsym err]))]
+        (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',form ,expect ,actual ,note)))
+
+
+    :expr
+    ~(,assert-expr* ,assertion ',assertion ,note)))
 
 
 ### Test definition macro

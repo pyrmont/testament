@@ -38,6 +38,15 @@
 (test-assert-thrown-macro)
 
 
+(defn test-assert-thrown-message-macro []
+  (let [summary (t/assert-thrown-message "An error" (error "An error"))]
+    (unless (= {:passed? true :note "thrown? \"An error\" (error \"An error\")" :report "Passed"} summary)
+      (error "Test failed"))))
+
+
+(test-assert-thrown-message-macro)
+
+
 (defn test-is-macro-with-value []
   (let (summary (t/is 1))
     (unless (= {:passed? true :note "1" :report "Passed"} summary)
@@ -63,6 +72,15 @@
 
 
 (test-is-macro-with-thrown)
+
+
+(defn test-is-macro-with-thrown-message []
+  (let [summary (t/is (thrown? "An error" (error "An error")))]
+    (unless (= {:passed? true :note "thrown? \"An error\" (error \"An error\")" :report "Passed"} summary)
+      (error "Test failed"))))
+
+
+(test-is-macro-with-thrown-message)
 
 
 (t/reset-tests!)
