@@ -104,7 +104,7 @@ A test is just a function. The `body` is used as the body of the function
 produced by this macro but with respective setup and teardown steps inserted
 before and after the forms in `body` are called.
 
-[5]: src/testament.janet#L278
+[5]: src/testament.janet#L279
 
 
 ## testament/is
@@ -118,12 +118,13 @@ before and after the forms in `body` are called.
 Assert that an `assertion` is true (with an optional `note`)
 
 The `is` macro provides a succinct mechanism for creating assertions.
-Testament includes support for three types of assertions:
+Testament includes support for four types of assertions:
 
 1. a generic assertion that asserts the Boolean truth of an expression;
 2. an equality assertion that asserts that an expected result and an actual
    result are equal;
-3. an assertion that an error will be thrown.
+3. an assertion that an error will be thrown; and
+4. an assertion that an error with a specific message was thrown.
 
 `is` causes the appropriate assertion to be inserted based on the form of the
 asserted expression.
@@ -144,7 +145,7 @@ identify the assertion.
 
 Reset all reporting variables
 
-[7]: src/testament.janet#L310
+[7]: src/testament.janet#L311
 
 
 ## testament/run-tests!
@@ -160,6 +161,6 @@ Run the registered tests
 Accepts an optional `:silent` argument that will omit any reports being
 printed.
 
-[8]: src/testament.janet#L295
+[8]: src/testament.janet#L296
 
 
