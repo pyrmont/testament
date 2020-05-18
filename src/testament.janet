@@ -236,12 +236,13 @@
   Assert that an `assertion` is true (with an optional `note`)
 
   The `is` macro provides a succinct mechanism for creating assertions.
-  Testament includes support for three types of assertions:
+  Testament includes support for four types of assertions:
 
   1. a generic assertion that asserts the Boolean truth of an expression;
   2. an equality assertion that asserts that an expected result and an actual
      result are equal;
-  3. an assertion that an error will be thrown.
+  3. an assertion that an error will be thrown; and
+  4. an assertion that an error with a specific message was thrown.
 
   `is` causes the appropriate assertion to be inserted based on the form of the
   asserted expression.
