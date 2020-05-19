@@ -138,7 +138,7 @@
   [expect expect-form actual actual-form note]
   (let [result (= expect actual)
         report (if result "Passed"
-                          (string "Expected: " (string/format "%q\n" expect)
+                          (string "Expect: " (string/format "%q\n" expect)
                                   "Actual: " (string/format "%q" actual)))
         note   (or note (string/format "(= %q %q)" expect-form actual-form))]
     (compose-and-record-result result report note)))
