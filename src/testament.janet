@@ -158,11 +158,11 @@
   ```
   Function form of assert-thrown-message
   ```
-  [thrown? form expect actual note]
+  [thrown? form expect-message expect-form actual-message note]
   (let [report (if thrown? "Passed"
-                           (string "Expect: Error message " (string/format "%q\n" expect)
-                                   "Actual: Error message " (string/format "%q" actual)))
-        note   (or note (string/format "thrown? %q %q" expect form))]
+                           (string "Expect: Error message " (string/format "%q\n" expect-message)
+                                   "Actual: Error message " (string/format "%q" actual-message)))
+        note   (or note (string/format "thrown? %q %q" expect-form form))]
     (compose-and-record-result thrown? report note)))
 
 
@@ -230,7 +230,7 @@
         sentinel (gensym)
         actual   (gensym)]
     ~(let [[,sentinel ,actual] (try (do ,form [nil nil]) ([err] [,errsym err]))]
-      (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',form ,expect ,actual ,note))))
+      (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',form ,expect ',expect ,actual ,note))))
 
 
 (defmacro is
@@ -269,7 +269,7 @@
           sentinel (gensym)
           actual   (gensym)]
       ~(let [[,sentinel ,actual] (try (do ,form [nil nil]) ([err] [,errsym err]))]
-        (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',form ,expect ,actual ,note)))
+        (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',form ,expect ',expect ,actual ,note)))
 
 
     :expr
