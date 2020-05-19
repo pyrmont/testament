@@ -58,7 +58,7 @@
 
 (defn test-is-macro-with-equality []
   (let (summary (t/is (= 1 2)))
-    (unless (= {:passed? false :note "(= 1 2)" :report "Expected: 1\nActual: 2"} summary)
+    (unless (= {:passed? false :note "(= 1 2)" :report "Expect: 1\nActual: 2"} summary)
       (error "Test failed"))))
 
 
