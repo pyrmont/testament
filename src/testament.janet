@@ -1,4 +1,6 @@
-### testament: a testing library for Janet
+### Testament
+
+## A testing library for Janet
 
 ## by Michael Camilleri
 ## 8 May 2020
