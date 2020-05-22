@@ -16,11 +16,21 @@
 (var- num-tests-passed 0)
 (var- tests @[])
 (var- reports @[])
+# possibly overridden by consumer
+(var- print-reports nil)
 
+(defn set-report-printer [func]
+  "Sets the `print-reports` function. The function func is applied with the following arguments:\n
+  - number of tests run\n
+  - number of assertions\n
+  - number of tests passed\n"
+  (if (= (type func) :function)
+    (set print-reports func))
+    (error "Invalid data in slot #0"))
 
 ### Reporting functions
 
-(defn- print-reports
+(defn- default-print-reports
   ```
   Print reports
   ```
@@ -305,7 +315,9 @@
   [&keys {:silent silent}]
   (each test tests (test))
   (unless silent
-    (print-reports))
+    (if (nil? print-reports)
+      (default-print-reports)
+      (print-reports num-tests-run num-asserts num-tests-passed)))
   (unless (= num-tests-run num-tests-passed)
     (os/exit 1)))
 
@@ -319,4 +331,5 @@
   (set num-asserts 0)
   (set num-tests-passed 0)
   (set tests @[])
-  (set reports @[]))
+  (set reports @[])
+  (set print-reports nil))
