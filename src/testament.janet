@@ -16,25 +16,34 @@
 (var- num-tests-passed 0)
 (var- tests @[])
 (var- reports @[])
-# possibly overridden by consumer
 (var- print-reports nil)
 
-(defn set-report-printer [func]
-  "Sets the `print-reports` function. The function func is applied with the following arguments:\n
-  - number of tests run\n
-  - number of assertions\n
-  - number of tests passed\n"
-  (if (= (type func) :function)
-    (set print-reports func))
-    (error "Invalid data in slot #0"))
 
 ### Reporting functions
+
+(defn set-report-printer
+  ```
+  Sets the `print-reports` function. The function `f` will be applied with the
+  following three arguments:
+
+  1. the number of tests run (as integer);
+  2. number of assertions (as integer); and
+  3. number of tests passed (as integer).
+
+  The function will not be called if `run-tests!` is called with `:silent` set
+  to `true`.
+  ```
+  [f]
+  (if (= :function (type f))
+    (set print-reports f)
+    (error "argument not of type :function")))
+
 
 (defn- default-print-reports
   ```
   Print reports
   ```
-  []
+  [num-tests-run num-asserts num-tests-passed]
   (each report reports
     (unless (empty? (report :failures))
       (do
@@ -315,9 +324,9 @@
   [&keys {:silent silent}]
   (each test tests (test))
   (unless silent
-    (if (nil? print-reports)
-      (default-print-reports)
-      (print-reports num-tests-run num-asserts num-tests-passed)))
+    (when (nil? print-reports)
+      (set-report-printer default-print-reports))
+    (print-reports num-tests-run num-asserts num-tests-passed))
   (unless (= num-tests-run num-tests-passed)
     (os/exit 1)))
 
