@@ -17,9 +17,25 @@
 (var- tests @[])
 (var- reports @[])
 (var- print-reports nil)
+(var- on-result-hook (fn [&]))
 
 
 ### Reporting functions
+
+(defn set-on-result-hook
+  ```
+  Sets the `on-result-hook`. The function `f` will be invoked when a `result`
+  becomes available. A result is a struct with the following keys:
+
+  :passed? whether the test succeeded (as boolean);
+  :report whether the test succeeded (as string);
+  :note a note aboute the assertion (as string, might be nil); and
+  ```
+  [f]
+  (if (= :function (type f))
+    (set on-result-hook f)
+    (error "argument not of type :function")))
+
 
 (defn set-report-printer
   ```
@@ -83,7 +99,8 @@
   (++ num-asserts)
   (let [result {:passed? passed? :report report :note note}]
     (when (not (empty? reports))
-      (add-to-report result))
+        (on-result-hook result)
+        (add-to-report result))
     result))
 
 
@@ -321,15 +338,20 @@
 
   Accepts an optional `:silent` argument that will omit any reports being
   printed.
+
+  Accepts an optional `:do-exit` argument tells run-tests! whether to exit
+  or not when all tests have run. Default is `true`.
   ```
-  [&keys {:silent silent}]
+  [&keys {:silent silent :do-exit do-exit}]
+  (default do-exit true)
   (each test tests (test))
   (unless silent
     (when (nil? print-reports)
       (set-report-printer default-print-reports))
     (print-reports num-tests-run num-asserts num-tests-passed))
-  (unless (= num-tests-run num-tests-passed)
-    (os/exit 1)))
+  (when do-exit
+    (unless  (= num-tests-run num-tests-passed)
+      (os/exit 1))))
 
 
 (defn reset-tests!
@@ -342,4 +364,5 @@
   (set num-tests-passed 0)
   (set tests @[])
   (set reports @[])
-  (set print-reports nil))
+  (set print-reports nil)
+  (set on-result-hook (fn [&])))

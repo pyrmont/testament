@@ -113,6 +113,28 @@
       (error "Test failed"))))
 
 
+(test-custom-reporting)
+
+
+(t/reset-tests!)
+
+(defn test-on-result-hook []
+  (var called false)
+  (t/set-on-result-hook (fn [summary]
+                          (unless (= {:passed? true :note "1" :report "Passed"} summary)
+                            (error "Test failed"))
+                          (set called true)))
+  (t/deftest test-name (t/assert-equal 1 1 "1"))
+  (let [output @""]
+    (with-dyns [:out output]
+      (t/run-tests!))
+    (unless called
+      (error "Test failed. on-result-hook was not called."))))
+
+
+(test-on-result-hook)
+
+
 (t/reset-tests!)
 
 (defn test-reporting-silent []
