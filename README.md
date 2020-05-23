@@ -19,7 +19,7 @@ Add the dependency to your `project.janet` file:
 
 ## Usage
 
-Testament can be used like this::
+Testament can be used like this:
 
 
 ```clojure
@@ -27,6 +27,9 @@ Testament can be used like this::
 
 (deftest one-plus-one
   (is (= 2 (+ 1 1)) "1 + 1 = 2"))
+
+(deftest two-plus-two
+  (is (= 5 (+ 2 2)) "2 + 2 = 5")))
 
 (run-tests!)
 ```
@@ -36,6 +39,28 @@ Put your tests in the `test/` directory within your project and then run:
 ```console
 $ jpm test
 ```
+
+If you do the above with a file saved to `test/example.janet`, you should see:
+
+```text
+running test/example.janet ...
+
+> Failed: two-plus-two
+Assertion: 2 + 2 = 5
+Expect: 5
+Actual: 4
+
+-----------------------------------
+2 tests run containing 2 assertions
+1 tests passed, 1 tests failed
+-----------------------------------
+```
+
+## API
+
+Documentation for Testament's API is in [api.md][api].
+
+[api]: https://github.com/pyrmont/testament/blob/master/api.md
 
 ## Bugs
 
