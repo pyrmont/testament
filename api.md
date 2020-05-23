@@ -8,7 +8,7 @@
 , [testament/is](#testamentis)
 , [testament/reset-tests!](#testamentreset-tests)
 , [testament/run-tests!](#testamentrun-tests)
-
+, [testament/set-report-printer](#testamentset-report-printer)
 
 ## testament/assert-equal
 
@@ -28,8 +28,7 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[1]: src/testament.janet#L182
-
+[1]: src/testament.janet#L203
 
 ## testament/assert-expr
 
@@ -46,8 +45,7 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[2]: src/testament.janet#L169
-
+[2]: src/testament.janet#L190
 
 ## testament/assert-thrown
 
@@ -66,8 +64,7 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form `thrown? form` is
 used.
 
-[3]: src/testament.janet#L198
-
+[3]: src/testament.janet#L219
 
 ## testament/assert-thrown-message
 
@@ -87,8 +84,7 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form
 `thrown? expect form` is used.
 
-[4]: src/testament.janet#L214
-
+[4]: src/testament.janet#L235
 
 ## testament/deftest
 
@@ -104,8 +100,7 @@ A test is just a function. The `body` is used as the body of the function
 produced by this macro but with respective setup and teardown steps inserted
 before and after the forms in `body` are called.
 
-[5]: src/testament.janet#L279
-
+[5]: src/testament.janet#L300
 
 ## testament/is
 
@@ -132,8 +127,7 @@ asserted expression.
 An optional `note` can be included that will be used in any failure report to
 identify the assertion.
 
-[6]: src/testament.janet#L234
-
+[6]: src/testament.janet#L255
 
 ## testament/reset-tests!
 
@@ -145,8 +139,7 @@ identify the assertion.
 
 Reset all reporting variables
 
-[7]: src/testament.janet#L311
-
+[7]: src/testament.janet#L334
 
 ## testament/run-tests!
 
@@ -161,6 +154,25 @@ Run the registered tests
 Accepts an optional `:silent` argument that will omit any reports being
 printed.
 
-[8]: src/testament.janet#L296
+[8]: src/testament.janet#L317
 
+## testament/set-report-printer
+
+**function**  | [source][9]
+
+```janet
+(set-report-printer f)
+```
+
+Sets the `print-reports` function. The function `f` will be applied with the
+following three arguments:
+
+1. the number of tests run (as integer);
+2. number of assertions (as integer); and
+3. number of tests passed (as integer).
+
+The function will not be called if `run-tests!` is called with `:silent` set
+to `true`.
+
+[9]: src/testament.janet#L24
 
