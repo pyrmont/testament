@@ -102,6 +102,19 @@
 
 (t/reset-tests!)
 
+(defn test-custom-reporting []
+  (t/set-report-printer (fn [notests noasserts nopassed]
+                          (print "CUSTOM:" notests ":" noasserts ":" nopassed ":")))
+  (t/deftest test-name (t/assert-equal 1 1))
+  (let [output @""]
+    (with-dyns [:out output]
+      (t/run-tests!))
+    (unless (= (string "CUSTOM:1:1:1:" "\n") (string output))
+      (error "Test failed"))))
+
+
+(t/reset-tests!)
+
 (defn test-reporting-silent []
   (t/deftest test-name (t/assert-equal 1 1))
   (let [output @""]

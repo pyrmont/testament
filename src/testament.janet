@@ -16,15 +16,34 @@
 (var- num-tests-passed 0)
 (var- tests @[])
 (var- reports @[])
+(var- print-reports nil)
 
 
 ### Reporting functions
 
-(defn- print-reports
+(defn set-report-printer
+  ```
+  Sets the `print-reports` function. The function `f` will be applied with the
+  following three arguments:
+
+  1. the number of tests run (as integer);
+  2. number of assertions (as integer); and
+  3. number of tests passed (as integer).
+
+  The function will not be called if `run-tests!` is called with `:silent` set
+  to `true`.
+  ```
+  [f]
+  (if (= :function (type f))
+    (set print-reports f)
+    (error "argument not of type :function")))
+
+
+(defn- default-print-reports
   ```
   Print reports
   ```
-  []
+  [num-tests-run num-asserts num-tests-passed]
   (each report reports
     (unless (empty? (report :failures))
       (do
@@ -305,7 +324,9 @@
   [&keys {:silent silent}]
   (each test tests (test))
   (unless silent
-    (print-reports))
+    (when (nil? print-reports)
+      (set-report-printer default-print-reports))
+    (print-reports num-tests-run num-asserts num-tests-passed))
   (unless (= num-tests-run num-tests-passed)
     (os/exit 1)))
 
@@ -319,4 +340,5 @@
   (set num-asserts 0)
   (set num-tests-passed 0)
   (set tests @[])
-  (set reports @[]))
+  (set reports @[])
+  (set print-reports nil))
