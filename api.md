@@ -52,16 +52,16 @@ identify the assertion. If no `note` is provided, the form of `expr` is used.
 **macro**  | [source][3]
 
 ```janet
-(assert-thrown form &opt note)
+(assert-thrown expr &opt note)
 ```
 
-Assert that the expression, `expr`, threw an error (with an optional `note`)
+Assert that an expression, `expr`, throws an error (with an optional `note`)
 
 The `assert-thrown` macro provides a mechanism for creating an assertion that
-an expression threw an error.
+an expression throws an error.
 
 An optional `note` can be included that will be used in any failure report to
-identify the assertion. If no `note` is provided, the form `thrown? form` is
+identify the assertion. If no `note` is provided, the form `thrown? expr` is
 used.
 
 [3]: src/testament.janet#L219
@@ -71,18 +71,18 @@ used.
 **macro**  | [source][4]
 
 ```janet
-(assert-thrown-message expect form &opt note)
+(assert-thrown-message expect expr &opt note)
 ```
 
-Assert that the expression, `expr`, threw an error with the message `expect`
+Assert that the expression, `expr`, throws an error with the message `expect`
 (with an optional `note`)
 
 The `assert-thrown` macro provides a mechanism for creating an assertion that
-an expression threw an error with the specified message.
+an expression throws an error with the specified message.
 
 An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form
-`thrown? expect form` is used.
+`thrown? expect expr` is used.
 
 [4]: src/testament.janet#L235
 
@@ -100,7 +100,7 @@ A test is just a function. The `body` is used as the body of the function
 produced by this macro but with respective setup and teardown steps inserted
 before and after the forms in `body` are called.
 
-[5]: src/testament.janet#L300
+[5]: src/testament.janet#L301
 
 ## testament/is
 
@@ -118,8 +118,9 @@ Testament includes support for four types of assertions:
 1. a generic assertion that asserts the Boolean truth of an expression;
 2. an equality assertion that asserts that an expected result and an actual
    result are equal;
-3. an assertion that an error will be thrown; and
-4. an assertion that an error with a specific message was thrown.
+3. a throwing assertion that asserts an error is thrown; and
+4. a throwing assertion that asserts an error with a specific message is
+   thrown.
 
 `is` causes the appropriate assertion to be inserted based on the form of the
 asserted expression.
@@ -139,7 +140,7 @@ identify the assertion.
 
 Reset all reporting variables
 
-[7]: src/testament.janet#L334
+[7]: src/testament.janet#L335
 
 ## testament/run-tests!
 
@@ -154,7 +155,7 @@ Run the registered tests
 Accepts an optional `:silent` argument that will omit any reports being
 printed.
 
-[8]: src/testament.janet#L317
+[8]: src/testament.janet#L318
 
 ## testament/set-report-printer
 

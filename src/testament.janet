@@ -218,38 +218,38 @@
 
 (defmacro assert-thrown
   ```
-  Assert that the expression, `expr`, threw an error (with an optional `note`)
+  Assert that an expression, `expr`, throws an error (with an optional `note`)
 
   The `assert-thrown` macro provides a mechanism for creating an assertion that
-  an expression threw an error.
+  an expression throws an error.
 
   An optional `note` can be included that will be used in any failure report to
-  identify the assertion. If no `note` is provided, the form `thrown? form` is
+  identify the assertion. If no `note` is provided, the form `thrown? expr` is
   used.
   ```
-  [form &opt note]
+  [expr &opt note]
   (let [errsym (keyword (gensym))]
-    ~(,assert-thrown* (= ,errsym (try ,form ([_] ,errsym))) ',form ,note)))
+    ~(,assert-thrown* (= ,errsym (try ,expr ([_] ,errsym))) ',expr ,note)))
 
 
 (defmacro assert-thrown-message
   ```
-  Assert that the expression, `expr`, threw an error with the message `expect`
+  Assert that the expression, `expr`, throws an error with the message `expect`
   (with an optional `note`)
 
   The `assert-thrown` macro provides a mechanism for creating an assertion that
-  an expression threw an error with the specified message.
+  an expression throws an error with the specified message.
 
   An optional `note` can be included that will be used in any failure report to
   identify the assertion. If no `note` is provided, the form
-  `thrown? expect form` is used.
+  `thrown? expect expr` is used.
   ```
-  [expect form &opt note]
+  [expect expr &opt note]
   (let [errsym   (keyword (gensym))
         sentinel (gensym)
         actual   (gensym)]
-    ~(let [[,sentinel ,actual] (try (do ,form [nil nil]) ([err] [,errsym err]))]
-      (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',form ,expect ',expect ,actual ,note))))
+    ~(let [[,sentinel ,actual] (try (do ,expr [nil nil]) ([err] [,errsym err]))]
+      (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',expr ,expect ',expect ,actual ,note))))
 
 
 (defmacro is
@@ -262,8 +262,9 @@
   1. a generic assertion that asserts the Boolean truth of an expression;
   2. an equality assertion that asserts that an expected result and an actual
      result are equal;
-  3. an assertion that an error will be thrown; and
-  4. an assertion that an error with a specific message was thrown.
+  3. a throwing assertion that asserts an error is thrown; and
+  4. a throwing assertion that asserts an error with a specific message is
+     thrown.
 
   `is` causes the appropriate assertion to be inserted based on the form of the
   asserted expression.
