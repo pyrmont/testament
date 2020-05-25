@@ -371,20 +371,20 @@
   ```
   Run the registered tests
 
-  Accepts an optional `:silent` argument that will omit any reports being
-  printed.
+  This function will run the tests registered in the test suite via `deftest`.
+  It accepts two optional arguments:
 
-  Accepts an optional `:do-exit` argument tells run-tests! whether to exit
-  or not when all tests have run. Default is `true`.
+  1. `:silent` whether to omit the printing of reports (default: `false`); and
+  2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
   ```
-  [&keys {:silent silent :do-exit do-exit}]
-  (default do-exit true)
+  [&keys {:silent silent? :exit-on-fail exit?}]
+  (default exit? true)
   (each test tests (test))
-  (unless silent
+  (unless silent?
     (when (nil? print-reports)
       (set-report-printer default-print-reports))
     (print-reports num-tests-run num-asserts num-tests-passed))
-  (when do-exit
+  (when exit?
     (unless  (= num-tests-run num-tests-passed)
       (os/exit 1))))
 
