@@ -13,7 +13,11 @@
 
 (defn test-assert-expr-macro []
   (let [summary (t/assert-expr 1)]
-    (unless (= {:passed? true :note "1" :details "Passed"} summary)
+    (unless (= summary {:kind    :expr
+                        :passed? true
+                        :expect  true
+                        :actual  true
+                        :note    "1"})
       (error "Test failed"))))
 
 
@@ -22,7 +26,11 @@
 
 (defn test-assert-equal-macro []
   (let [summary (t/assert-equal 1 1)]
-    (unless (= {:passed? true :note "(= 1 1)" :details "Passed"} summary)
+    (unless (= summary {:kind    :equal
+                        :passed? true
+                        :expect  1
+                        :actual  1
+                        :note    "(= 1 1)"})
       (error "Test failed"))))
 
 
@@ -31,7 +39,11 @@
 
 (defn test-assert-thrown-macro []
   (let [summary (t/assert-thrown (error "An error"))]
-    (unless (= {:passed? true :note "thrown? (error \"An error\")" :details "Passed"} summary)
+    (unless (= summary {:kind    :thrown
+                        :passed? true
+                        :expect  true
+                        :actual  true
+                        :note    "thrown? (error \"An error\")"})
       (error "Test failed"))))
 
 
@@ -40,7 +52,11 @@
 
 (defn test-assert-thrown-message-macro []
   (let [summary (t/assert-thrown-message "An error" (error "An error"))]
-    (unless (= {:passed? true :note "thrown? \"An error\" (error \"An error\")" :details "Passed"} summary)
+    (unless (= summary {:kind    :thrown-message
+                        :passed? true
+                        :expect  "An error"
+                        :actual  "An error"
+                        :note    "thrown? \"An error\" (error \"An error\")"})
       (error "Test failed"))))
 
 
@@ -49,7 +65,11 @@
 
 (defn test-is-macro-with-value []
   (let (summary (t/is 1))
-    (unless (= {:passed? true :note "1" :details "Passed"} summary)
+    (unless (= summary {:kind    :expr
+                        :passed? true
+                        :expect  true
+                        :actual  true
+                        :note    "1"})
       (error "Test failed"))))
 
 
@@ -58,7 +78,11 @@
 
 (defn test-is-macro-with-equality []
   (let (summary (t/is (= 1 2)))
-    (unless (= {:passed? false :note "(= 1 2)" :details "Expect: 1\nActual: 2"} summary)
+    (unless (= summary {:kind    :equal
+                        :passed? false
+                        :expect  1
+                        :actual  2
+                        :note    "(= 1 2)"})
       (error "Test failed"))))
 
 
@@ -67,7 +91,11 @@
 
 (defn test-is-macro-with-thrown []
   (let [summary (t/is (thrown? (error "An error")))]
-    (unless (= {:passed? true :note "thrown? (error \"An error\")" :details "Passed"} summary)
+    (unless (= summary {:kind    :thrown
+                        :passed? true
+                        :expect  true
+                        :actual  true
+                        :note    "thrown? (error \"An error\")"})
       (error "Test failed"))))
 
 
@@ -76,7 +104,11 @@
 
 (defn test-is-macro-with-thrown-message []
   (let [summary (t/is (thrown? "An error" (error "An error")))]
-    (unless (= {:passed? true :note "thrown? \"An error\" (error \"An error\")" :details "Passed"} summary)
+    (unless (= summary {:kind    :thrown-message
+                        :passed? true
+                        :expect  "An error"
+                        :actual  "An error"
+                        :note    "thrown? \"An error\" (error \"An error\")"})
       (error "Test failed"))))
 
 
@@ -121,7 +153,11 @@
 (defn test-on-result-hook []
   (var called false)
   (t/set-on-result-hook (fn [summary]
-                          (unless (= {:passed? true :note "1" :details "Passed"} summary)
+                          (unless (= summary {:kind    :equal
+                                              :passed? true
+                                              :expect  1
+                                              :actual  1
+                                              :note   "1"})
                             (error "Test failed"))
                           (set called true)))
   (t/deftest test-name (t/assert-equal 1 1 "1"))
