@@ -30,7 +30,7 @@
   `result` is a struct with the following keys:
 
   - `:kind` the kind of assertion (as keyword);
-  - `:passed?` whether an assertion succeeded (as Boolean);
+  - `:passed?` whether an assertion succeeded (as boolean);
   - `:expect` the expected value of the assertion;
   - `:actual` the actual value of the assertion; and
   - `:note` a description of the assertion (as string).
