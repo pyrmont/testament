@@ -27,9 +27,14 @@
   Sets the `on-result-hook`. The function `f` will be invoked when a `result`
   becomes available. A result is a struct with the following keys:
 
-  :passed? whether the test succeeded (as boolean);
-  :report whether the test succeeded (as string);
-  :note a note aboute the assertion (as string, might be nil); and
+  - `:passed?` whether an assertion succeeded (as boolean);
+  - `:details` the details of the result (as string);
+  - `:note` a description of the assertion (as string).
+
+  The value of the string returned via `:details` will depend on the type of
+  assertion made. Successful asssertions always result in the string "Passed"
+  but failed assertions will result in a message relevant to the contents of
+  the assertion (see the specific assertion for more details).
   ```
   [f]
   (if (= :function (type f))
@@ -66,7 +71,7 @@
         (print "\n> Failed: " (report :name))
         (each failure (report :failures)
           (print "Assertion: " (failure :note))
-          (print (failure :report))))))
+          (print (failure :details))))))
   (let [stats (string num-tests-run " tests run containing "
                       num-asserts " assertions\n"
                       num-tests-passed " tests passed, "
@@ -95,9 +100,9 @@
   ```
   Compose a result and record it if applicable
   ```
-  [passed? report note]
+  [passed? details note]
   (++ num-asserts)
-  (let [result {:passed? passed? :report report :note note}]
+  (let [result {:passed? passed? :details details :note note}]
     (when (not (empty? reports))
         (on-result-hook result)
         (add-to-report result))
@@ -161,10 +166,10 @@
   Function form of assert-expr
   ```
   [expr form note]
-  (let [expr   (not (not expr))
-        report (if expr "Passed" "Reason: Result is Boolean false")
-        note   (or note (string/format "%q" form))]
-   (compose-and-record-result expr report note)))
+  (let [expr    (not (not expr))
+        details (if expr "Passed" "Reason: Result is Boolean false")
+        note    (or note (string/format "%q" form))]
+   (compose-and-record-result expr details note)))
 
 
 (defn- assert-equal*
@@ -172,12 +177,12 @@
   Function form of assert-equal
   ```
   [expect expect-form actual actual-form note]
-  (let [result (= expect actual)
-        report (if result "Passed"
-                          (string "Expect: " (string/format "%q\n" expect)
-                                  "Actual: " (string/format "%q" actual)))
-        note   (or note (string/format "(= %q %q)" expect-form actual-form))]
-    (compose-and-record-result result report note)))
+  (let [result  (= expect actual)
+        details (if result "Passed"
+                           (string "Expect: " (string/format "%q\n" expect)
+                                   "Actual: " (string/format "%q" actual)))
+        note    (or note (string/format "(= %q %q)" expect-form actual-form))]
+    (compose-and-record-result result details note)))
 
 
 (defn- assert-thrown*
@@ -185,9 +190,9 @@
   Function form of assert-thrown
   ```
   [thrown? form note]
-  (let [report (if thrown? "Passed" "Reason: No error thrown")
-        note   (or note (string/format "thrown? %q" form))]
-    (compose-and-record-result thrown? report note)))
+  (let [details (if thrown? "Passed" "Reason: No error thrown")
+        note    (or note (string/format "thrown? %q" form))]
+    (compose-and-record-result thrown? details  note)))
 
 
 (defn- assert-thrown-message*
@@ -195,11 +200,11 @@
   Function form of assert-thrown-message
   ```
   [thrown? form expect-message expect-form actual-message note]
-  (let [report (if thrown? "Passed"
-                           (string "Expect: Error message " (string/format "%q\n" expect-message)
-                                   "Actual: Error message " (string/format "%q" actual-message)))
-        note   (or note (string/format "thrown? %q %q" expect-form form))]
-    (compose-and-record-result thrown? report note)))
+  (let [details (if thrown? "Passed"
+                            (string "Expect: Error message " (string/format "%q\n" expect-message)
+                                    "Actual: Error message " (string/format "%q" actual-message)))
+        note    (or note (string/format "thrown? %q %q" expect-form form))]
+    (compose-and-record-result thrown? details note)))
 
 
 ### Assertion macros
@@ -210,8 +215,15 @@
 
   The `assert-expr` macro provides a mechanism for creating a generic assertion.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion. If no `note` is provided, the form of `expr` is used.
+
+  When an assertion is run as part of a test, the result is saved in the test's
+  report. The result of an assertion is a struct with 3 keys: (1) `:passed?` (a
+  boolean), (2) `:details` (a string) and (3) `:note` (a string). If the
+  assertion succeeds, the value of `:details` will be "Passed". If the
+  assertion fails, the value of `:details` will be "Reason: Result is Boolean
+  false".
   ```
   [expr &opt note]
   ~(,assert-expr* ,expr ',expr ,note))
@@ -228,6 +240,13 @@
   An optional `note` can be included that will be used in any failure report to
   identify the assertion. If no `note` is provided, the form `(= expect actual)`
   is used.
+
+  When an assertion is run as part of a test, the result is saved in the test's
+  report. The result of an assertion is a struct with 3 keys: (1) `:passed?` (a
+  boolean), (2) `:details` (a string) and (3) `:note` (a string). If the
+  assertion succeeds, the value of `:details` will be "Passed". If the
+  assertion fails, the value of `:details` will be "Expect:
+  <expected evaluation>\nActual: <actual evaluation>".
   ```
   [expect actual &opt note]
   ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
@@ -243,6 +262,12 @@
   An optional `note` can be included that will be used in any failure report to
   identify the assertion. If no `note` is provided, the form `thrown? expr` is
   used.
+
+  When an assertion is run as part of a test, the result is saved in the test's
+  report. The result of an assertion is a struct with 3 keys: (1) `:passed?` (a
+  boolean), (2) `:details` (a string) and (3) `:note` (a string). If the
+  assertion succeeds, the value of `:details` will be "Passed". If the
+  assertion fails, the value of `:details` will be "Reason: No error thrown".
   ```
   [expr &opt note]
   (let [errsym (keyword (gensym))]
@@ -260,6 +285,13 @@
   An optional `note` can be included that will be used in any failure report to
   identify the assertion. If no `note` is provided, the form
   `thrown? expect expr` is used.
+
+  When an assertion is run as part of a test, the result is saved in the test's
+  report. The result of an assertion is a struct with 3 keys: (1) `:passed?` (a
+  boolean), (2) `:details` (a string) and (3) `:note` (a string). If the
+  assertion succeeds, the value of `:details` will be "Passed". If the
+  assertion fails, the value of `:details` will be "Expect: Error message
+  <expected message>\nActual: Error message <actual message>".
   ```
   [expect expr &opt note]
   (let [errsym   (keyword (gensym))
@@ -288,6 +320,9 @@
 
   An optional `note` can be included that will be used in any failure report to
   identify the assertion.
+
+  See the documentation for each assertion type for details of the result
+  reported.
   ```
   [assertion &opt note]
   (case (which assertion)
