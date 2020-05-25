@@ -219,9 +219,9 @@
   identify the assertion. If no `note` is provided, the form of `expr` is used.
 
   When an assertion is run as part of a test, the result is saved in the test's
-  report. The result of an assertion is a struct with 3 keys: (1) `:passed?` (a
-  boolean), (2) `:details` (a string) and (3) `:note` (a string). If the
-  assertion succeeds, the value of `:details` will be "Passed". If the
+  report. The result of an assertion is a struct with three keys: (1)
+  `:passed?` (a boolean), (2) `:details` (a string) and (3) `:note` (a string).
+  If the assertion succeeds, the value of `:details` will be "Passed". If the
   assertion fails, the value of `:details` will be "Reason: Result is Boolean
   false".
   ```
@@ -242,11 +242,11 @@
   is used.
 
   When an assertion is run as part of a test, the result is saved in the test's
-  report. The result of an assertion is a struct with 3 keys: (1) `:passed?` (a
-  boolean), (2) `:details` (a string) and (3) `:note` (a string). If the
-  assertion succeeds, the value of `:details` will be "Passed". If the
-  assertion fails, the value of `:details` will be "Expect:
-  <expected evaluation>\nActual: <actual evaluation>".
+  report. The result of an assertion is a struct with three keys: (1)
+  `:passed?` (a boolean), (2) `:details` (a string) and (3) `:note` (a string).
+  If the assertion succeeds, the value of `:details` will be "Passed". If the
+  assertion fails, the value of `:details` will be "Expect: <expected
+  evaluation>\nActual: <actual evaluation>".
   ```
   [expect actual &opt note]
   ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
@@ -264,9 +264,9 @@
   used.
 
   When an assertion is run as part of a test, the result is saved in the test's
-  report. The result of an assertion is a struct with 3 keys: (1) `:passed?` (a
-  boolean), (2) `:details` (a string) and (3) `:note` (a string). If the
-  assertion succeeds, the value of `:details` will be "Passed". If the
+  report. The result of an assertion is a struct with three keys: (1)
+  `:passed?` (a boolean), (2) `:details` (a string) and (3) `:note` (a string).
+  If the assertion succeeds, the value of `:details` will be "Passed". If the
   assertion fails, the value of `:details` will be "Reason: No error thrown".
   ```
   [expr &opt note]
@@ -287,9 +287,9 @@
   `thrown? expect expr` is used.
 
   When an assertion is run as part of a test, the result is saved in the test's
-  report. The result of an assertion is a struct with 3 keys: (1) `:passed?` (a
-  boolean), (2) `:details` (a string) and (3) `:note` (a string). If the
-  assertion succeeds, the value of `:details` will be "Passed". If the
+  report. The result of an assertion is a struct with three keys: (1)
+  `:passed?` (a boolean), (2) `:details` (a string) and (3) `:note` (a string).
+  If the assertion succeeds, the value of `:details` will be "Passed". If the
   assertion fails, the value of `:details` will be "Expect: Error message
   <expected message>\nActual: Error message <actual message>".
   ```
