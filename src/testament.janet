@@ -267,7 +267,7 @@
   an expected result is equal to the actual result. The forms of `expect` and
   `actual` will be used in the output of any failure report.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion. If no `note` is provided, the form `(= expect actual)`
   is used.
   ```
@@ -282,7 +282,7 @@
   The `assert-thrown` macro provides a mechanism for creating an assertion that
   an expression throws an error.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion. If no `note` is provided, the form `thrown? expr` is
   used.
   ```
@@ -299,7 +299,7 @@
   The `assert-thrown` macro provides a mechanism for creating an assertion that
   an expression throws an error with the specified message.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion. If no `note` is provided, the form
   `thrown? expect expr` is used.
   ```
@@ -328,7 +328,7 @@
   `is` causes the appropriate assertion to be inserted based on the form of the
   asserted expression.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion.
   ```
   [assertion &opt note]

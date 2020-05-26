@@ -25,7 +25,7 @@ The `assert-equal` macro provides a mechanism for creating an assertion that
 an expected result is equal to the actual result. The forms of `expect` and
 `actual` will be used in the output of any failure report.
 
-An optional `note` can be included that will be used in any failure report to
+An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
@@ -61,7 +61,7 @@ Assert that an expression, `expr`, throws an error (with an optional `note`)
 The `assert-thrown` macro provides a mechanism for creating an assertion that
 an expression throws an error.
 
-An optional `note` can be included that will be used in any failure report to
+An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `thrown? expr` is
 used.
 
@@ -81,7 +81,7 @@ Assert that the expression, `expr`, throws an error with the message `expect`
 The `assert-thrown` macro provides a mechanism for creating an assertion that
 an expression throws an error with the specified message.
 
-An optional `note` can be included that will be used in any failure report to
+An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `thrown? expect expr` is used.
 
@@ -126,7 +126,7 @@ Testament includes support for four types of assertions:
 `is` causes the appropriate assertion to be inserted based on the form of the
 asserted expression.
 
-An optional `note` can be included that will be used in any failure report to
+An optional `note` can be included that will be used in any failure result to
 identify the assertion.
 
 [6]: src/testament.janet#L314
