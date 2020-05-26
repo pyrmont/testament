@@ -2,9 +2,6 @@
 
 ## A testing library for Janet
 
-## by Michael Camilleri
-## 8 May 2020
-
 ## Thanks to Sean Walker (for tester) and to Stuart Sierra (for clojure.test),
 ## both of which served as inspirations.
 
@@ -349,7 +346,6 @@
           actual   (gensym)]
       ~(let [[,sentinel ,actual] (try (do ,form [nil nil]) ([err] [,errsym err]))]
         (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',form ,expect ',expect ,actual ,note)))
-
 
     :expr
     ~(,assert-expr* ,assertion ',assertion ,note)))
