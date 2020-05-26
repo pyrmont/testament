@@ -153,7 +153,8 @@
 (defn test-on-result-hook []
   (var called false)
   (t/set-on-result-hook (fn [summary]
-                          (unless (= summary {:kind    :equal
+                          (unless (= summary {:test    'test-name
+                                              :kind    :equal
                                               :passed? true
                                               :expect  1
                                               :actual  1

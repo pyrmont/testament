@@ -11,8 +11,9 @@
 (var- num-tests-run 0)
 (var- num-asserts 0)
 (var- num-tests-passed 0)
-(var- tests @[])
-(var- reports @[])
+(var- curr-test nil)
+(var- tests @{})
+(var- reports @{})
 (var- print-reports nil)
 (var- on-result-hook (fn [&]))
 
@@ -67,7 +68,7 @@
   (each report reports
     (unless (empty? (report :failures))
       (do
-        (print "\n> Failed: " (report :name))
+        (print "\n> Failed: " (report :test))
         (each failure (report :failures)
           (print "Assertion: " (failure :note))
           (print (failure-message failure))))))
@@ -92,6 +93,8 @@
   function is called with a single argument, the `result`. The `result` is a
   struct with the following keys:
 
+  - `:test` the name of the test to which the assertion belongs (as `nil` or
+    symbol);
   - `:kind` the kind of assertion (as keyword);
   - `:passed?` whether an assertion succeeded (as boolean);
   - `:expect` the expected value of the assertion;
@@ -113,14 +116,12 @@
 
 (defn- add-to-report
   ```
-  Add result to the current report
-
-  The current report is the last report created. Behaviour is undefined if tests
-  are run in parallel or concurrently.
+  Add `result` to the report for test `name`
   ```
   [result]
-  (let [latest (last reports)
-        queue  (if (result :passed?) (latest :passes) (latest :failures))]
+  (if-let [name   (result :test)
+           report (reports name)
+           queue  (if (result :passed?) (report :passes) (report :failures))]
     (array/push queue result)))
 
 
@@ -130,9 +131,8 @@
   ```
   [result]
   (++ num-asserts)
-  (when (not (empty? reports))
-    (on-result-hook result)
-    (add-to-report result))
+  (on-result-hook result)
+  (add-to-report result)
   result)
 
 
@@ -140,11 +140,15 @@
 
 (defn- register-test
   ```
-  Register a test with the test suite
+  Register a test `t` with a `name `in the test suite
+
+  This function will raise an error if a test with the same `name` has already
+  been registered in the test suite.
   ```
-  [t]
-  (array/push tests t)
-  t)
+  [name t]
+  (unless (nil? (tests name))
+    (error "cannot register tests with the same name"))
+  (set (tests name) t))
 
 
 (defn- setup-test
@@ -152,8 +156,8 @@
   Perform tasks to setup the test, `name`
   ```
   [name]
-  (++ num-tests-run)
-  (array/push reports @{:name name :passes @[] :failures @[]}))
+  (set curr-test name)
+  (put reports name @{:test name :passes @[] :failures @[]}))
 
 
 (defn- teardown-test
@@ -161,8 +165,10 @@
   Perform tasks to teardown the test, `name`
   ```
   [name]
-  (if (-> (array/peek reports) (get :failures) length zero?)
-    (++ num-tests-passed)))
+  (++ num-tests-run)
+  (if (-> (reports name) (get :failures) length zero?)
+    (++ num-tests-passed))
+  (set curr-test nil))
 
 
 ### Utility function
@@ -194,7 +200,8 @@
   ```
   [expr form note]
   (let [passed? (not (not expr))
-        result  {:kind    :expr
+        result  {:test    curr-test
+                 :kind    :expr
                  :passed? passed?
                  :expect  true
                  :actual  passed?
@@ -207,7 +214,8 @@
   Function form of assert-equal
   ```
   [expect expect-form actual actual-form note]
-  (let [result {:kind    :equal
+  (let [result {:test    curr-test
+                :kind    :equal
                 :passed? (= expect actual)
                 :expect  expect
                 :actual  actual
@@ -220,7 +228,8 @@
   Function form of assert-thrown
   ```
   [thrown? form note]
-  (let [result {:kind    :thrown
+  (let [result {:test    curr-test
+                :kind    :thrown
                 :passed? thrown?
                 :expect  true
                 :actual  thrown?
@@ -233,7 +242,8 @@
   Function form of assert-thrown-message
   ```
   [thrown? form expect-message expect-form actual-message note]
-  (let [result {:kind    :thrown-message
+  (let [result {:test    curr-test
+                :kind    :thrown-message
                 :passed? thrown?
                 :expect  expect-message
                 :actual  actual-message
@@ -355,17 +365,20 @@
 
 (defmacro deftest
   ```
-  Define a test, `name`, and register it in the suite
+  Define a test, bind it to `name` and register it in the suite
 
   A test is just a function. The `body` is used as the body of the function
   produced by this macro but with respective setup and teardown steps inserted
   before and after the forms in `body` are called.
+
+  If a test with the same `name` has already been defined, `deftest` will raise
+  an error.
   ```
   [name & body]
-  ~(def ,name (,register-test (fn []
-                                (,setup-test ',name)
-                                ,;body
-                                (,teardown-test ',name)))))
+  ~(def ,name (,register-test ',name (fn []
+                                       (,setup-test ',name)
+                                       ,;body
+                                       (,teardown-test ',name)))))
 
 
 ### Test suite functions
@@ -382,7 +395,7 @@
   ```
   [&keys {:silent silent? :exit-on-fail exit?}]
   (default exit? true)
-  (each test tests (test))
+  (each test (values tests) (test))
   (unless silent?
     (when (nil? print-reports)
       (set-report-printer default-print-reports))
@@ -400,7 +413,8 @@
   (set num-tests-run 0)
   (set num-asserts 0)
   (set num-tests-passed 0)
-  (set tests @[])
-  (set reports @[])
+  (set curr-test nil)
+  (set tests @{})
+  (set reports @{})
   (set print-reports nil)
   (set on-result-hook (fn [&])))

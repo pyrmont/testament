@@ -29,7 +29,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[1]: src/testament.janet#L259
+[1]: src/testament.janet#L269
 
 ## testament/assert-expr
 
@@ -46,7 +46,7 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[2]: src/testament.janet#L246
+[2]: src/testament.janet#L256
 
 ## testament/assert-thrown
 
@@ -65,7 +65,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `thrown? expr` is
 used.
 
-[3]: src/testament.janet#L275
+[3]: src/testament.janet#L285
 
 ## testament/assert-thrown-message
 
@@ -85,7 +85,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `thrown? expect expr` is used.
 
-[4]: src/testament.janet#L291
+[4]: src/testament.janet#L301
 
 ## testament/deftest
 
@@ -95,13 +95,16 @@ identify the assertion. If no `note` is provided, the form
 (deftest name & body)
 ```
 
-Define a test, `name`, and register it in the suite
+Define a test, bind it to `name` and register it in the suite
 
 A test is just a function. The `body` is used as the body of the function
 produced by this macro but with respective setup and teardown steps inserted
 before and after the forms in `body` are called.
 
-[5]: src/testament.janet#L356
+If a test with the same `name` has already been defined, `deftest` will raise
+an error.
+
+[5]: src/testament.janet#L366
 
 ## testament/is
 
@@ -129,7 +132,7 @@ asserted expression.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion.
 
-[6]: src/testament.janet#L311
+[6]: src/testament.janet#L321
 
 ## testament/reset-tests!
 
@@ -141,7 +144,7 @@ identify the assertion.
 
 Reset all reporting variables
 
-[7]: src/testament.janet#L395
+[7]: src/testament.janet#L408
 
 ## testament/run-tests!
 
@@ -159,7 +162,7 @@ It accepts two optional arguments:
 1. `:silent` whether to omit the printing of reports (default: `false`); and
 2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
 
-[8]: src/testament.janet#L373
+[8]: src/testament.janet#L386
 
 ## testament/set-on-result-hook
 
@@ -175,6 +178,8 @@ The function `f` will be invoked when a result becomes available. The
 function is called with a single argument, the `result`. The `result` is a
 struct with the following keys:
 
+- `:test` the name of the test to which the assertion belongs (as `nil` or
+  symbol);
 - `:kind` the kind of assertion (as keyword);
 - `:passed?` whether an assertion succeeded (as boolean);
 - `:expect` the expected value of the assertion;
@@ -188,7 +193,7 @@ The 'value' of the assertion depends on the kind of assertion:
 - `:thrown` either `true` or `false`; and
 - `:thrown-message` the error specified in the assertion.
 
-[9]: src/testament.janet#L87
+[9]: src/testament.janet#L88
 
 ## testament/set-report-printer
 
@@ -209,5 +214,5 @@ The function `f` will be applied with the following three arguments:
 The function will not be called if `run-tests!` is called with `:silent` set
 to `true`.
 
-[10]: src/testament.janet#L22
+[10]: src/testament.janet#L23
 
