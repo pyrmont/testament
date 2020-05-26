@@ -22,32 +22,6 @@
 
 ### Reporting functions
 
-(defn set-on-result-hook
-  ```
-  Set the `on-result-hook`
-
-  The function `f` will be invoked when a `result` becomes available. The
-  `result` is a struct with the following keys:
-
-  - `:kind` the kind of assertion (as keyword);
-  - `:passed?` whether an assertion succeeded (as boolean);
-  - `:expect` the expected value of the assertion;
-  - `:actual` the actual value of the assertion; and
-  - `:note` a description of the assertion (as string).
-
-  The 'value' of the assertion depends on the kind of assertion:
-
-  - `:expr` either `true` or `false`;
-  - `:equal` the value specified in the assertion;
-  - `:thrown` either `true` or `false`; and
-  - `:thrown-message` the error specified in the assertion.
-  ```
-  [f]
-  (if (= :function (type f))
-    (set on-result-hook f)
-    (error "argument not of type :function")))
-
-
 (defn set-report-printer
   ```
   Set the `print-reports` function
@@ -109,6 +83,35 @@
     (print (string/repeat "-" len))
     (print stats)
     (print (string/repeat "-" len))))
+
+
+### Recording functions
+
+(defn set-on-result-hook
+  ```
+  Set the `on-result-hook`
+
+  The function `f` will be invoked when a result becomes available. The
+  function is called with a single argument, the `result`. The `result` is a
+  struct with the following keys:
+
+  - `:kind` the kind of assertion (as keyword);
+  - `:passed?` whether an assertion succeeded (as boolean);
+  - `:expect` the expected value of the assertion;
+  - `:actual` the actual value of the assertion; and
+  - `:note` a description of the assertion (as string).
+
+  The 'value' of the assertion depends on the kind of assertion:
+
+  - `:expr` either `true` or `false`;
+  - `:equal` the value specified in the assertion;
+  - `:thrown` either `true` or `false`; and
+  - `:thrown-message` the error specified in the assertion.
+  ```
+  [f]
+  (if (= :function (type f))
+    (set on-result-hook f)
+    (error "argument not of type :function")))
 
 
 (defn- add-to-report
@@ -327,9 +330,6 @@
 
   An optional `note` can be included that will be used in any failure report to
   identify the assertion.
-
-  See the documentation for each assertion type for details of the result
-  reported.
   ```
   [assertion &opt note]
   (case (which assertion)

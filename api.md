@@ -29,7 +29,7 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[1]: src/testament.janet#L259
+[1]: src/testament.janet#L262
 
 ## testament/assert-expr
 
@@ -46,7 +46,7 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[2]: src/testament.janet#L246
+[2]: src/testament.janet#L249
 
 ## testament/assert-thrown
 
@@ -65,7 +65,7 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form `thrown? expr` is
 used.
 
-[3]: src/testament.janet#L275
+[3]: src/testament.janet#L278
 
 ## testament/assert-thrown-message
 
@@ -85,7 +85,7 @@ An optional `note` can be included that will be used in any failure report to
 identify the assertion. If no `note` is provided, the form
 `thrown? expect expr` is used.
 
-[4]: src/testament.janet#L291
+[4]: src/testament.janet#L294
 
 ## testament/deftest
 
@@ -129,10 +129,7 @@ asserted expression.
 An optional `note` can be included that will be used in any failure report to
 identify the assertion.
 
-See the documentation for each assertion type for details of the result
-reported.
-
-[6]: src/testament.janet#L311
+[6]: src/testament.janet#L314
 
 ## testament/reset-tests!
 
@@ -174,8 +171,9 @@ It accepts two optional arguments:
 
 Set the `on-result-hook`
 
-The function `f` will be invoked when a `result` becomes available. The
-`result` is a struct with the following keys:
+The function `f` will be invoked when a result becomes available. The
+function is called with a single argument, the `result`. The `result` is a
+struct with the following keys:
 
 - `:kind` the kind of assertion (as keyword);
 - `:passed?` whether an assertion succeeded (as boolean);
@@ -190,7 +188,7 @@ The 'value' of the assertion depends on the kind of assertion:
 - `:thrown` either `true` or `false`; and
 - `:thrown-message` the error specified in the assertion.
 
-[9]: src/testament.janet#L25
+[9]: src/testament.janet#L90
 
 ## testament/set-report-printer
 
@@ -211,5 +209,5 @@ The function `f` will be applied with the following three arguments:
 The function will not be called if `run-tests!` is called with `:silent` set
 to `true`.
 
-[10]: src/testament.janet#L51
+[10]: src/testament.janet#L25
 
