@@ -17,14 +17,16 @@
 (var- tests @[])
 (var- reports @[])
 (var- print-reports nil)
+(var- on-result-hook (fn [&]))
 
 
 ### Reporting functions
 
 (defn set-report-printer
   ```
-  Sets the `print-reports` function. The function `f` will be applied with the
-  following three arguments:
+  Set the `print-reports` function
+
+  The function `f` will be applied with the following three arguments:
 
   1. the number of tests run (as integer);
   2. number of assertions (as integer); and
@@ -39,6 +41,27 @@
     (error "argument not of type :function")))
 
 
+(defn- failure-message
+  ```
+  Return the appropriate failure message for the given result
+  ```
+  [result]
+  (case (result :kind)
+    :equal
+    (string "Expect: " (string/format "%q" (result :expect)) "\n"
+            "Actual: " (string/format "%q" (result :actual)))
+
+    :thrown
+    "Reason: No error thrown"
+
+    :thrown-message
+    (string "Expect: Error message " (string/format "%q" (result :expect)) "\n"
+            "Actual: Error message " (string/format "%q" (result :actual)))
+
+    :expr
+    "Reason: Result is Boolean false"))
+
+
 (defn- default-print-reports
   ```
   Print reports
@@ -50,7 +73,7 @@
         (print "\n> Failed: " (report :name))
         (each failure (report :failures)
           (print "Assertion: " (failure :note))
-          (print (failure :report))))))
+          (print (failure-message failure))))))
   (let [stats (string num-tests-run " tests run containing "
                       num-asserts " assertions\n"
                       num-tests-passed " tests passed, "
@@ -60,6 +83,35 @@
     (print (string/repeat "-" len))
     (print stats)
     (print (string/repeat "-" len))))
+
+
+### Recording functions
+
+(defn set-on-result-hook
+  ```
+  Set the `on-result-hook`
+
+  The function `f` will be invoked when a result becomes available. The
+  function is called with a single argument, the `result`. The `result` is a
+  struct with the following keys:
+
+  - `:kind` the kind of assertion (as keyword);
+  - `:passed?` whether an assertion succeeded (as boolean);
+  - `:expect` the expected value of the assertion;
+  - `:actual` the actual value of the assertion; and
+  - `:note` a description of the assertion (as string).
+
+  The 'value' of the assertion depends on the kind of assertion:
+
+  - `:expr` either `true` or `false`;
+  - `:equal` the value specified in the assertion;
+  - `:thrown` either `true` or `false`; and
+  - `:thrown-message` the error specified in the assertion.
+  ```
+  [f]
+  (if (= :function (type f))
+    (set on-result-hook f)
+    (error "argument not of type :function")))
 
 
 (defn- add-to-report
@@ -79,12 +131,12 @@
   ```
   Compose a result and record it if applicable
   ```
-  [passed? report note]
+  [result]
   (++ num-asserts)
-  (let [result {:passed? passed? :report report :note note}]
-    (when (not (empty? reports))
-      (add-to-report result))
-    result))
+  (when (not (empty? reports))
+    (on-result-hook result)
+    (add-to-report result))
+  result)
 
 
 ### Test utility functions
@@ -144,10 +196,13 @@
   Function form of assert-expr
   ```
   [expr form note]
-  (let [expr   (not (not expr))
-        report (if expr "Passed" "Reason: Result is Boolean false")
-        note   (or note (string/format "%q" form))]
-   (compose-and-record-result expr report note)))
+  (let [passed? (not (not expr))
+        result  {:kind    :expr
+                 :passed? passed?
+                 :expect  true
+                 :actual  passed?
+                 :note    (or note (string/format "%q" form))}]
+   (compose-and-record-result result)))
 
 
 (defn- assert-equal*
@@ -155,12 +210,12 @@
   Function form of assert-equal
   ```
   [expect expect-form actual actual-form note]
-  (let [result (= expect actual)
-        report (if result "Passed"
-                          (string "Expect: " (string/format "%q\n" expect)
-                                  "Actual: " (string/format "%q" actual)))
-        note   (or note (string/format "(= %q %q)" expect-form actual-form))]
-    (compose-and-record-result result report note)))
+  (let [result {:kind    :equal
+                :passed? (= expect actual)
+                :expect  expect
+                :actual  actual
+                :note    (or note (string/format "(= %q %q)" expect-form actual-form))}]
+    (compose-and-record-result result)))
 
 
 (defn- assert-thrown*
@@ -168,9 +223,12 @@
   Function form of assert-thrown
   ```
   [thrown? form note]
-  (let [report (if thrown? "Passed" "Reason: No error thrown")
-        note   (or note (string/format "thrown? %q" form))]
-    (compose-and-record-result thrown? report note)))
+  (let [result {:kind    :thrown
+                :passed? thrown?
+                :expect  true
+                :actual  thrown?
+                :note    (or note (string/format "thrown? %q" form))}]
+    (compose-and-record-result result)))
 
 
 (defn- assert-thrown-message*
@@ -178,11 +236,12 @@
   Function form of assert-thrown-message
   ```
   [thrown? form expect-message expect-form actual-message note]
-  (let [report (if thrown? "Passed"
-                           (string "Expect: Error message " (string/format "%q\n" expect-message)
-                                   "Actual: Error message " (string/format "%q" actual-message)))
-        note   (or note (string/format "thrown? %q %q" expect-form form))]
-    (compose-and-record-result thrown? report note)))
+  (let [result {:kind    :thrown-message
+                :passed? thrown?
+                :expect  expect-message
+                :actual  actual-message
+                :note    (or note (string/format "thrown? %q %q" expect-form form))}]
+    (compose-and-record-result result)))
 
 
 ### Assertion macros
@@ -193,7 +252,7 @@
 
   The `assert-expr` macro provides a mechanism for creating a generic assertion.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion. If no `note` is provided, the form of `expr` is used.
   ```
   [expr &opt note]
@@ -208,7 +267,7 @@
   an expected result is equal to the actual result. The forms of `expect` and
   `actual` will be used in the output of any failure report.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion. If no `note` is provided, the form `(= expect actual)`
   is used.
   ```
@@ -223,7 +282,7 @@
   The `assert-thrown` macro provides a mechanism for creating an assertion that
   an expression throws an error.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion. If no `note` is provided, the form `thrown? expr` is
   used.
   ```
@@ -240,7 +299,7 @@
   The `assert-thrown` macro provides a mechanism for creating an assertion that
   an expression throws an error with the specified message.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion. If no `note` is provided, the form
   `thrown? expect expr` is used.
   ```
@@ -269,7 +328,7 @@
   `is` causes the appropriate assertion to be inserted based on the form of the
   asserted expression.
 
-  An optional `note` can be included that will be used in any failure report to
+  An optional `note` can be included that will be used in any failure result to
   identify the assertion.
   ```
   [assertion &opt note]
@@ -319,17 +378,22 @@
   ```
   Run the registered tests
 
-  Accepts an optional `:silent` argument that will omit any reports being
-  printed.
+  This function will run the tests registered in the test suite via `deftest`.
+  It accepts two optional arguments:
+
+  1. `:silent` whether to omit the printing of reports (default: `false`); and
+  2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
   ```
-  [&keys {:silent silent}]
+  [&keys {:silent silent? :exit-on-fail exit?}]
+  (default exit? true)
   (each test tests (test))
-  (unless silent
+  (unless silent?
     (when (nil? print-reports)
       (set-report-printer default-print-reports))
     (print-reports num-tests-run num-asserts num-tests-passed))
-  (unless (= num-tests-run num-tests-passed)
-    (os/exit 1)))
+  (when exit?
+    (unless  (= num-tests-run num-tests-passed)
+      (os/exit 1))))
 
 
 (defn reset-tests!
@@ -342,4 +406,5 @@
   (set num-tests-passed 0)
   (set tests @[])
   (set reports @[])
-  (set print-reports nil))
+  (set print-reports nil)
+  (set on-result-hook (fn [&])))
