@@ -365,20 +365,38 @@
 
 (defmacro deftest
   ```
-  Define a test, bind it to `name` and register it in the suite
+  Define a test and register it in the test suite
 
-  A test is just a function. The `body` is used as the body of the function
-  produced by this macro but with respective setup and teardown steps inserted
-  before and after the forms in `body` are called.
+  The `deftest` macro can be used to create named tests and anonymous tests. If
+  the first argument is a symbol, that argument is treated as the name of the
+  test. Otherwise, Testament uses `gensym` to generate a unique symbol to name
+  the test. If a test with the same name has already been defined, `deftest`
+  will raise an error.
 
-  If a test with the same `name` has already been defined, `deftest` will raise
-  an error.
+  A test is just a function. `args` (excluding the first argument if that
+  argument is a symbol) is used as the body of the function. Testament adds
+  respective calls to a setup function and a teardown function before and after
+  the forms in the body.
+
+  In addition to creating a function, `deftest` registers the test in the 'test
+  suite'. Testament's test suite is a global table of tests that have been
+  registered by `deftest`. When a user calls `run-tests!`, each test in the
+  test suite is called. The order in which each test is called is not
+  guaranteed.
+
+  If `deftest` is called with no arguments or if the only argument is a symbol,
+  an arity error is raised.
   ```
-  [name & body]
-  ~(def ,name (,register-test ',name (fn []
-                                       (,setup-test ',name)
-                                       ,;body
-                                       (,teardown-test ',name)))))
+  [& args]
+  (when (or (zero? (length args))
+            (and (one? (length args)) (= :symbol (type (first args)))))
+    (error "arity mismatch"))
+  (let [[name body] (if (= :symbol (type (first args))) [(first args) (slice args 1)]
+                                                        [(symbol "test" (gensym)) args])]
+    ~(def ,name (,register-test ',name (fn []
+                                         (,setup-test ',name)
+                                         ,;body
+                                         (,teardown-test ',name))))))
 
 
 ### Test suite functions

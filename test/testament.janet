@@ -11,6 +11,15 @@
 (test-deftest-macro)
 
 
+(defn test-anon-deftest-macro []
+  (def anon-test (t/deftest :noop))
+  (unless (= :function (type anon-test))
+    (error "Test failed")))
+
+
+(test-anon-deftest-macro)
+
+
 (defn test-assert-expr-macro []
   (let [summary (t/assert-expr 1)]
     (unless (= summary {:kind    :expr
