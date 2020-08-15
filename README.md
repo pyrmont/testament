@@ -29,7 +29,7 @@ Testament can be used like this:
   (is (= 2 (+ 1 1)) "1 + 1 = 2"))
 
 (deftest two-plus-two
-  (is (= 5 (+ 2 2)) "2 + 2 = 5")))
+  (is (= 5 (+ 2 2)) "2 + 2 = 5"))
 
 (run-tests!)
 ```
