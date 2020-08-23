@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: checkout testament
+    - name: checkout project
       uses: actions/checkout@v2
     - name: find latest version of janet
       uses: oprypin/find-latest-tag@v1
@@ -27,5 +27,15 @@ jobs:
       run: tar -xvzf janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
     - name: add directory to path
       run: echo "::add-path::janet-${{ steps.janet-ver.outputs.tag }}-linux"
+    - name: make modules directory
+      run: mkdir modules
+    - name: set JANET_PATH
+      run: echo "::set-env name=JANET_PATH::modules"
+    - name: set JANET_LIBPATH
+      run: echo "::set-env name=JANET_LIBPATH::janet-${{ steps.janet-ver.outputs.tag }}-linux"
+    - name: set JANET_HEADERPATH
+      run: echo "::set-env name=JANET_HEADERPATH::janet-${{ steps.janet-ver.outputs.tag }}-linux"
+    - name: install dependencies
+      run: /usr/bin/env jpm deps
     - name: run tests
       run: /usr/bin/env jpm test
