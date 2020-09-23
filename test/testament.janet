@@ -46,6 +46,19 @@
 (test-assert-equal-macro)
 
 
+(defn test-assert-deep-equal-macro []
+  (let [summary (t/assert-deep-equal @[1] @[1])]
+    (unless (deep= summary {:kind    :equal
+                            :passed? true
+                            :expect  @[1]
+                            :actual  @[1]
+                            :note    "(deep= @[1] @[1])"})
+      (error "Test failed"))))
+
+
+(test-assert-deep-equal-macro)
+
+
 (defn test-assert-thrown-macro []
   (let [summary (t/assert-thrown (error "An error"))]
     (unless (= summary {:kind    :thrown
@@ -73,7 +86,7 @@
 
 
 (defn test-is-macro-with-value []
-  (let (summary (t/is 1))
+  (let [summary (t/is 1)]
     (unless (= summary {:kind    :expr
                         :passed? true
                         :expect  true
@@ -86,7 +99,7 @@
 
 
 (defn test-is-macro-with-equality []
-  (let (summary (t/is (= 1 2)))
+  (let [summary (t/is (= 1 2))]
     (unless (= summary {:kind    :equal
                         :passed? false
                         :expect  1
@@ -96,6 +109,19 @@
 
 
 (test-is-macro-with-equality)
+
+
+(defn test-is-macro-with-deep-equality []
+  (let [summary (t/is (deep= @[1] @[2]))]
+    (unless (deep= summary {:kind    :equal
+                            :passed? false
+                            :expect  @[1]
+                            :actual  @[2]
+                            :note    "(deep= @[1] @[2])"})
+      (error "Test failed"))))
+
+
+(test-is-macro-with-deep-equality)
 
 
 (defn test-is-macro-with-thrown []

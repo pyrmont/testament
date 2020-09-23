@@ -182,6 +182,9 @@
     (and (tuple? assertion) (= 3 (length assertion)) (= '= (first assertion)))
     :equal
 
+    (and (tuple? assertion) (= 3 (length assertion)) (= 'deep= (first assertion)))
+    :deep-equal
+
     (and (tuple? assertion) (= 2 (length assertion)) (= 'thrown? (first assertion)))
     :thrown
 
@@ -220,6 +223,20 @@
                 :expect  expect
                 :actual  actual
                 :note    (or note (string/format "(= %q %q)" expect-form actual-form))}]
+    (compose-and-record-result result)))
+
+
+(defn- assert-deep-equal*
+  ```
+  Function form of assert-deep-equal
+  ```
+  [expect expect-form actual actual-form note]
+  (let [result {:test    curr-test
+                :kind    :equal
+                :passed? (deep= expect actual)
+                :expect  expect
+                :actual  actual
+                :note    (or note (string/format "(deep= %q %q)" expect-form actual-form))}]
     (compose-and-record-result result)))
 
 
@@ -282,6 +299,22 @@
   ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
 
 
+(defmacro assert-deep-equal
+  ```
+  Assert that `expect` is deeply equal to `actual` (with an optional `note`)
+
+  The `assert-deep-equal` macro provides a mechanism for creating an assertion
+  that an expected result is deeply equal to the actual result. The forms of
+  `expect` and `actual` will be used in the output of any failure report.
+
+  An optional `note` can be included that will be used in any failure result to
+  identify the assertion. If no `note` is provided, the form `(deep= expect actual)`
+  is used.
+  ```
+  [expect actual &opt note]
+  ~(,assert-deep-equal* ,expect ',expect ,actual ',actual ,note))
+
+
 (defmacro assert-thrown
   ```
   Assert that an expression, `expr`, throws an error (with an optional `note`)
@@ -323,13 +356,15 @@
   Assert that an `assertion` is true (with an optional `note`)
 
   The `is` macro provides a succinct mechanism for creating assertions.
-  Testament includes support for four types of assertions:
+  Testament includes support for five types of assertions:
 
   1. a generic assertion that asserts the Boolean truth of an expression;
   2. an equality assertion that asserts that an expected result and an actual
      result are equal;
-  3. a throwing assertion that asserts an error is thrown; and
-  4. a throwing assertion that asserts an error with a specific message is
+  3. an equality assertion that asserts that an expected result and an actual
+     result are deeply equal;
+  4. a throwing assertion that asserts an error is thrown; and
+  5. a throwing assertion that asserts an error with a specific message is
      thrown.
 
   `is` causes the appropriate assertion to be inserted based on the form of the
@@ -343,6 +378,10 @@
     :equal
     (let [[_ expect actual] assertion]
       ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
+
+    :deep-equal
+    (let [[_ expect actual] assertion]
+      ~(,assert-deep-equal* ,expect ',expect ,actual ',actual ,note))
 
     :thrown
     (let [[_ form] assertion
