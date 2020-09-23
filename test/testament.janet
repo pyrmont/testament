@@ -2,6 +2,16 @@
 (import ../src/testament :as t :exit true)
 
 
+(defn test-== []
+  (def x [1])
+  (def y @[1])
+  (unless (t/== x y)
+    (error "Test failed")))
+
+
+(test-==)
+
+
 (defn test-deftest-macro []
   (t/deftest test-name :noop)
   (unless (= :function (type test-name))
@@ -46,17 +56,17 @@
 (test-assert-equal-macro)
 
 
-(defn test-assert-deep-equal-macro []
-  (let [summary (t/assert-deep-equal @[1] @[1])]
+(defn test-assert-equivalent-macro []
+  (let [summary (t/assert-equivalent [1] @[1])]
     (unless (deep= summary {:kind    :equal
                             :passed? true
-                            :expect  @[1]
+                            :expect  [1]
                             :actual  @[1]
-                            :note    "(deep= @[1] @[1])"})
+                            :note    "(== [1] @[1])"})
       (error "Test failed"))))
 
 
-(test-assert-deep-equal-macro)
+(test-assert-equivalent-macro)
 
 
 (defn test-assert-thrown-macro []
@@ -111,17 +121,17 @@
 (test-is-macro-with-equality)
 
 
-(defn test-is-macro-with-deep-equality []
-  (let [summary (t/is (deep= @[1] @[2]))]
+(defn test-is-macro-with-equivalence []
+  (let [summary (t/is (== [1] @[2]))]
     (unless (deep= summary {:kind    :equal
                             :passed? false
-                            :expect  @[1]
+                            :expect  [1]
                             :actual  @[2]
-                            :note    "(deep= @[1] @[2])"})
+                            :note    "(== [1] @[2])"})
       (error "Test failed"))))
 
 
-(test-is-macro-with-deep-equality)
+(test-is-macro-with-equivalence)
 
 
 (defn test-is-macro-with-thrown []

@@ -18,6 +18,48 @@
 (var- on-result-hook (fn [&]))
 
 
+### Equality functions
+
+(defn- types-equivalent?
+  [tx ty]
+  (or
+    (= tx ty)
+    (case tx
+      :tuple  (= :array ty)
+      :array  (= :tuple ty)
+      :struct (= :table ty)
+      :table  (= :struct ty)
+      :buffer (= :string ty)
+      (= tx ty))))
+
+
+(defn- not==
+  [x y]
+  (def tx (type x))
+  (or
+    (not (types-equivalent? tx (type y)))
+    (case tx
+      :tuple  (or (not= (length x) (length y)) (some identity (map not== x y)))
+      :array  (or (not= (length x) (length y)) (some identity (map not== x y)))
+      :struct (not== (kvs x) (kvs y))
+      :table  (not== (table/to-struct x) (table/to-struct y))
+      :buffer (not== (string x) (string y))
+      (not= x y))))
+
+
+(defn ==
+  ```
+  Return true if the arguments are equivalent
+
+  The arguments are considered equivalent for the purposes of this function if
+  they are of equivalent types and have the same structure. Types are equivalent
+  if they are the same or differ only in terms of mutability (e.g. arrays and
+  tuples).
+  ```
+  [x y]
+  (not (not== x y)))
+
+
 ### Reporting functions
 
 (defn set-report-printer
@@ -182,8 +224,8 @@
     (and (tuple? assertion) (= 3 (length assertion)) (= '= (first assertion)))
     :equal
 
-    (and (tuple? assertion) (= 3 (length assertion)) (= 'deep= (first assertion)))
-    :deep-equal
+    (and (tuple? assertion) (= 3 (length assertion)) (= '== (first assertion)))
+    :equivalent
 
     (and (tuple? assertion) (= 2 (length assertion)) (= 'thrown? (first assertion)))
     :thrown
@@ -226,17 +268,17 @@
     (compose-and-record-result result)))
 
 
-(defn- assert-deep-equal*
+(defn- assert-equivalent*
   ```
-  Function form of assert-deep-equal
+  Function form of assert-equivalent
   ```
   [expect expect-form actual actual-form note]
   (let [result {:test    curr-test
                 :kind    :equal
-                :passed? (deep= expect actual)
+                :passed? (== expect actual)
                 :expect  expect
                 :actual  actual
-                :note    (or note (string/format "(deep= %q %q)" expect-form actual-form))}]
+                :note    (or note (string/format "(== %q %q)" expect-form actual-form))}]
     (compose-and-record-result result)))
 
 
@@ -299,20 +341,23 @@
   ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
 
 
-(defmacro assert-deep-equal
+(defmacro assert-equivalent
   ```
-  Assert that `expect` is deeply equal to `actual` (with an optional `note`)
+  Assert that `expect` is equivalent to `actual` (with an optional `note`)
 
-  The `assert-deep-equal` macro provides a mechanism for creating an assertion
-  that an expected result is deeply equal to the actual result. The forms of
-  `expect` and `actual` will be used in the output of any failure report.
+  The `assert-equivalent` macro provides a mechanism for creating an assertion
+  that an expected result is equivalent to the actual result. Testament
+  considers forms to be equivalent if the types are 'equivalent' (that is, they
+  are the same or differ only in terms of mutability) and the structure is
+  equivalent.  The forms of `expect` and `actual` will be used in the output of
+  any failure report.
 
   An optional `note` can be included that will be used in any failure result to
-  identify the assertion. If no `note` is provided, the form `(deep= expect actual)`
+  identify the assertion. If no `note` is provided, the form `(== expect actual)`
   is used.
   ```
   [expect actual &opt note]
-  ~(,assert-deep-equal* ,expect ',expect ,actual ',actual ,note))
+  ~(,assert-equivalent* ,expect ',expect ,actual ',actual ,note))
 
 
 (defmacro assert-thrown
@@ -361,8 +406,8 @@
   1. a generic assertion that asserts the Boolean truth of an expression;
   2. an equality assertion that asserts that an expected result and an actual
      result are equal;
-  3. an equality assertion that asserts that an expected result and an actual
-     result are deeply equal;
+  3. an equivalence assertion that asserts that an expected result and an actual
+     result are equivalent;
   4. a throwing assertion that asserts an error is thrown; and
   5. a throwing assertion that asserts an error with a specific message is
      thrown.
@@ -379,9 +424,9 @@
     (let [[_ expect actual] assertion]
       ~(,assert-equal* ,expect ',expect ,actual ',actual ,note))
 
-    :deep-equal
+    :equivalent
     (let [[_ expect actual] assertion]
-      ~(,assert-deep-equal* ,expect ',expect ,actual ',actual ,note))
+      ~(,assert-equivalent* ,expect ',expect ,actual ',actual ,note))
 
     :thrown
     (let [[_ form] assertion
