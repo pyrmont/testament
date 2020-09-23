@@ -1,6 +1,7 @@
 # Testament API
 
 [testament/==](#testament==)
+, [testament/assert-deep-equal](#testamentassert-deep-equal)
 , [testament/assert-equal](#testamentassert-equal)
 , [testament/assert-equivalent](#testamentassert-equivalent)
 , [testament/assert-expr](#testamentassert-expr)
@@ -30,9 +31,29 @@ tuples).
 
 [1]: src/testament.janet#L50
 
-## testament/assert-equal
+## testament/assert-deep-equal
 
 **macro**  | [source][2]
+
+```janet
+(assert-deep-equal expect actual &opt note)
+```
+
+Assert that `expect` is deeply equal to `actual` (with an optional `note`)
+
+The `assert-deep-equal` macro provides a mechanism for creating an assertion
+that an expected result is deeply equal to the actual result. The forms of
+`expect` and `actual` will be used in the output of any failure report.
+
+An optional `note` can be included that will be used in any failure result to
+identify the assertion. If no `note` is provided, the form
+`(deep= expect actual)` is used.
+
+[2]: src/testament.janet#L361
+
+## testament/assert-equal
+
+**macro**  | [source][3]
 
 ```janet
 (assert-equal expect actual &opt note)
@@ -48,11 +69,11 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[2]: src/testament.janet#L328
+[3]: src/testament.janet#L345
 
 ## testament/assert-equivalent
 
-**macro**  | [source][3]
+**macro**  | [source][4]
 
 ```janet
 (assert-equivalent expect actual &opt note)
@@ -71,11 +92,11 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(== expect actual)`
 is used.
 
-[3]: src/testament.janet#L344
+[4]: src/testament.janet#L377
 
 ## testament/assert-expr
 
-**macro**  | [source][4]
+**macro**  | [source][5]
 
 ```janet
 (assert-expr expr &opt note)
@@ -88,11 +109,11 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[4]: src/testament.janet#L315
+[5]: src/testament.janet#L332
 
 ## testament/assert-thrown
 
-**macro**  | [source][5]
+**macro**  | [source][6]
 
 ```janet
 (assert-thrown expr &opt note)
@@ -107,11 +128,11 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `thrown? expr` is
 used.
 
-[5]: src/testament.janet#L363
+[6]: src/testament.janet#L396
 
 ## testament/assert-thrown-message
 
-**macro**  | [source][6]
+**macro**  | [source][7]
 
 ```janet
 (assert-thrown-message expect expr &opt note)
@@ -127,11 +148,11 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `thrown? expect expr` is used.
 
-[6]: src/testament.janet#L379
+[7]: src/testament.janet#L412
 
 ## testament/deftest
 
-**macro**  | [source][7]
+**macro**  | [source][8]
 
 ```janet
 (deftest & args)
@@ -159,11 +180,11 @@ guaranteed.
 If `deftest` is called with no arguments or if the only argument is a symbol,
 an arity error is raised.
 
-[7]: src/testament.janet#L450
+[8]: src/testament.janet#L489
 
 ## testament/is
 
-**macro**  | [source][8]
+**macro**  | [source][9]
 
 ```janet
 (is assertion &opt note)
@@ -172,15 +193,17 @@ an arity error is raised.
 Assert that an `assertion` is true (with an optional `note`)
 
 The `is` macro provides a succinct mechanism for creating assertions.
-Testament includes support for five types of assertions:
+Testament includes support for six types of assertions:
 
 1. a generic assertion that asserts the Boolean truth of an expression;
 2. an equality assertion that asserts that an expected result and an actual
    result are equal;
-3. an equivalence assertion that asserts that an expected result and an actual
+3. a deep equality assertion that asserts that an expected result and an
+   actual result are deeply equal;
+4. an equivalence assertion that asserts that an expected result and an actual
    result are equivalent;
-4. a throwing assertion that asserts an error is thrown; and
-5. a throwing assertion that asserts an error with a specific message is
+5. a throwing assertion that asserts an error is thrown; and
+6. a throwing assertion that asserts an error with a specific message is
    thrown.
 
 `is` causes the appropriate assertion to be inserted based on the form of the
@@ -189,11 +212,11 @@ asserted expression.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion.
 
-[8]: src/testament.janet#L399
+[9]: src/testament.janet#L432
 
 ## testament/reset-tests!
 
-**function**  | [source][9]
+**function**  | [source][10]
 
 ```janet
 (reset-tests!)
@@ -201,11 +224,11 @@ identify the assertion.
 
 Reset all reporting variables
 
-[9]: src/testament.janet#L510
+[10]: src/testament.janet#L549
 
 ## testament/run-tests!
 
-**function**  | [source][10]
+**function**  | [source][11]
 
 ```janet
 (run-tests! &keys {:exit-on-fail exit? :silent silent?})
@@ -219,11 +242,11 @@ It accepts two optional arguments:
 1. `:silent` whether to omit the printing of reports (default: `false`); and
 2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
 
-[10]: src/testament.janet#L488
+[11]: src/testament.janet#L527
 
 ## testament/set-on-result-hook
 
-**function**  | [source][11]
+**function**  | [source][12]
 
 ```janet
 (set-on-result-hook f)
@@ -250,11 +273,11 @@ The 'value' of the assertion depends on the kind of assertion:
 - `:thrown` either `true` or `false`; and
 - `:thrown-message` the error specified in the assertion.
 
-[11]: src/testament.janet#L130
+[12]: src/testament.janet#L130
 
 ## testament/set-report-printer
 
-**function**  | [source][12]
+**function**  | [source][13]
 
 ```janet
 (set-report-printer f)
@@ -271,5 +294,5 @@ The function `f` will be applied with the following three arguments:
 The function will not be called if `run-tests!` is called with `:silent` set
 to `true`.
 
-[12]: src/testament.janet#L65
+[13]: src/testament.janet#L65
 

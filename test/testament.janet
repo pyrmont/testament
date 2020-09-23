@@ -56,6 +56,19 @@
 (test-assert-equal-macro)
 
 
+(defn test-assert-deep-equal-macro []
+  (let [summary (t/assert-deep-equal @[1] @[1])]
+    (unless (deep= summary {:kind    :equal
+                            :passed? true
+                            :expect  @[1]
+                            :actual  @[1]
+                            :note    "(deep= @[1] @[1])"})
+      (error "Test failed"))))
+
+
+(test-assert-deep-equal-macro)
+
+
 (defn test-assert-equivalent-macro []
   (let [summary (t/assert-equivalent [1] @[1])]
     (unless (deep= summary {:kind    :equal
@@ -119,6 +132,19 @@
 
 
 (test-is-macro-with-equality)
+
+
+(defn test-is-macro-with-deep-equality []
+  (let [summary (t/is (deep= @[1] @[2]))]
+    (unless (deep= summary {:kind    :equal
+                            :passed? false
+                            :expect  @[1]
+                            :actual  @[2]
+                            :note    "(deep= @[1] @[2])"})
+      (error "Test failed"))))
+
+
+(test-is-macro-with-deep-equality)
 
 
 (defn test-is-macro-with-equivalence []
