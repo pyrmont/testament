@@ -14,11 +14,13 @@ jobs:
     steps:
     - name: checkout project
       uses: actions/checkout@v2
+      with:
+        submodules: false
     - name: find latest version of janet
       uses: oprypin/find-latest-tag@v1
       with:
         repository: janet-lang/janet
-        releases_only: true
+        releases-only: true
         prefix: 'v'
       id: janet-ver
     - name: download janet
@@ -26,15 +28,15 @@ jobs:
     - name: extract janet
       run: tar -xvzf janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
     - name: add directory to path
-      run: echo "::add-path::janet-${{ steps.janet-ver.outputs.tag }}-linux"
+      run: echo "janet-${{ steps.janet-ver.outputs.tag }}-linux" >> $GITHUB_PATH
     - name: make modules directory
       run: mkdir modules
     - name: set JANET_PATH
-      run: echo "::set-env name=JANET_PATH::modules"
+      run: echo "JANET_PATH=modules" >> $GITHUB_ENV
     - name: set JANET_LIBPATH
-      run: echo "::set-env name=JANET_LIBPATH::janet-${{ steps.janet-ver.outputs.tag }}-linux"
+      run: echo "JANET_LIBPATH=janet-${{ steps.janet-ver.outputs.tag }}-linux" >> $GITHUB_ENV
     - name: set JANET_HEADERPATH
-      run: echo "::set-env name=JANET_HEADERPATH::janet-${{ steps.janet-ver.outputs.tag }}-linux"
+      run: echo "JANET_HEADERPATH=janet-${{ steps.janet-ver.outputs.tag }}-linux" >> $GITHUB_ENV
     - name: install dependencies
       run: /usr/bin/env jpm deps
     - name: run tests
