@@ -1,10 +1,9 @@
-# (import ../src/testament :prefix "" :exit true)
 (import ../src/testament :as t :exit true)
 
 
 (defn test-== []
-  (def x [1])
-  (def y @[1])
+  (def x [@[{:a 1}]])
+  (def y @[[@{:a 1}]])
   (unless (t/== x y)
     (error "Test failed")))
 

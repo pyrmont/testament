@@ -20,17 +20,21 @@
 
 ### Equivalence functions
 
+(def- kind
+  {:tuple  :list
+   :array  :list
+   :struct :dictionary
+   :table  :dictionary
+   :string :bytes
+   :buffer :bytes})
+
+
 (defn- types-equivalent?
   [tx ty]
   (or
     (= tx ty)
-    (case tx
-      :tuple  (= :array ty)
-      :array  (= :tuple ty)
-      :struct (= :table ty)
-      :table  (= :struct ty)
-      :buffer (= :string ty)
-      (= tx ty))))
+    (and (not (nil? (kind tx)))
+         (= (kind tx) (kind ty)))))
 
 
 (defn- not==
@@ -38,12 +42,12 @@
   (def tx (type x))
   (or
     (not (types-equivalent? tx (type y)))
-    (case tx
-      :tuple  (or (not= (length x) (length y)) (some identity (map not== x y)))
-      :array  (or (not= (length x) (length y)) (some identity (map not== x y)))
-      :struct (not== (kvs x) (kvs y))
-      :table  (not== (table/to-struct x) (table/to-struct y))
-      :buffer (not== (string x) (string y))
+    (case (kind tx)
+      :list (or (not= (length x) (length y))
+                (some identity (map not== x y)))
+      :dictionary (or (not= (length (keys x)) (length (keys y)))
+                      (some identity (seq [k :in (keys x)] (not== (get x k) (get y k)))))
+      :bytes (not== (string x) (string y))
       (not= x y))))
 
 
