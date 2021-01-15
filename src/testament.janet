@@ -47,7 +47,7 @@
                 (some identity (map not== x y)))
       :dictionary (or (not= (length (keys x)) (length (keys y)))
                       (some identity (seq [k :in (keys x)] (not== (get x k) (get y k)))))
-      :bytes (not== (string x) (string y))
+      :bytes (not= (string x) (string y))
       (not= x y))))
 
 
