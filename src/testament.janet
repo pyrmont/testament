@@ -26,7 +26,8 @@
    :struct :dictionary
    :table  :dictionary
    :string :bytes
-   :buffer :bytes})
+   :buffer :bytes
+   :number :number})
 
 
 (defn- types-equivalent?
@@ -48,6 +49,8 @@
       :dictionary (or (not= (length (keys x)) (length (keys y)))
                       (some identity (seq [k :in (keys x)] (not== (get x k) (get y k)))))
       :bytes (not= (string x) (string y))
+      :number (or (and (nan? x) (not (nan? y)))
+                  (and (not (nan? x)) (not= x y)))
       (not= x y))))
 
 
@@ -59,6 +62,9 @@
   they are of equivalent types and have the same structure. Types are equivalent
   if they are the same or differ only in terms of mutability (e.g. arrays and
   tuples).
+
+  Instances of `math/nan` are considered equivalent for the purposes of this
+  function.
   ```
   [x y]
   (not (not== x y)))

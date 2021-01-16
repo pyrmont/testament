@@ -29,7 +29,10 @@ they are of equivalent types and have the same structure. Types are equivalent
 if they are the same or differ only in terms of mutability (e.g. arrays and
 tuples).
 
-[1]: src/testament.janet#L50
+Instances of `math/nan` are considered equivalent for the purposes of this
+function.
+
+[1]: src/testament.janet#L57
 
 ## testament/assert-deep-equal
 
@@ -49,7 +52,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `(deep= expect actual)` is used.
 
-[2]: src/testament.janet#L361
+[2]: src/testament.janet#L371
 
 ## testament/assert-equal
 
@@ -69,7 +72,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[3]: src/testament.janet#L345
+[3]: src/testament.janet#L355
 
 ## testament/assert-equivalent
 
@@ -92,7 +95,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(== expect actual)`
 is used.
 
-[4]: src/testament.janet#L377
+[4]: src/testament.janet#L387
 
 ## testament/assert-expr
 
@@ -109,7 +112,7 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[5]: src/testament.janet#L332
+[5]: src/testament.janet#L342
 
 ## testament/assert-thrown
 
@@ -128,7 +131,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `thrown? expr` is
 used.
 
-[6]: src/testament.janet#L396
+[6]: src/testament.janet#L406
 
 ## testament/assert-thrown-message
 
@@ -148,7 +151,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `thrown? expect expr` is used.
 
-[7]: src/testament.janet#L412
+[7]: src/testament.janet#L422
 
 ## testament/deftest
 
@@ -180,7 +183,7 @@ guaranteed.
 If `deftest` is called with no arguments or if the only argument is a symbol,
 an arity error is raised.
 
-[8]: src/testament.janet#L489
+[8]: src/testament.janet#L499
 
 ## testament/is
 
@@ -212,7 +215,7 @@ asserted expression.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion.
 
-[9]: src/testament.janet#L432
+[9]: src/testament.janet#L442
 
 ## testament/reset-tests!
 
@@ -224,7 +227,7 @@ identify the assertion.
 
 Reset all reporting variables
 
-[10]: src/testament.janet#L549
+[10]: src/testament.janet#L559
 
 ## testament/run-tests!
 
@@ -242,7 +245,7 @@ It accepts two optional arguments:
 1. `:silent` whether to omit the printing of reports (default: `false`); and
 2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
 
-[11]: src/testament.janet#L527
+[11]: src/testament.janet#L537
 
 ## testament/set-on-result-hook
 
@@ -273,7 +276,7 @@ The 'value' of the assertion depends on the kind of assertion:
 - `:thrown` either `true` or `false`; and
 - `:thrown-message` the error specified in the assertion.
 
-[12]: src/testament.janet#L130
+[12]: src/testament.janet#L140
 
 ## testament/set-report-printer
 
@@ -294,5 +297,5 @@ The function `f` will be applied with the following three arguments:
 The function will not be called if `run-tests!` is called with `:silent` set
 to `true`.
 
-[13]: src/testament.janet#L65
+[13]: src/testament.janet#L75
 
