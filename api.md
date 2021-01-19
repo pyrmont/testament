@@ -1,6 +1,6 @@
 # Testament API
 
-[testament/==](#testament==)
+[testament/==](#testament)
 , [testament/assert-deep-equal](#testamentassert-deep-equal)
 , [testament/assert-equal](#testamentassert-equal)
 , [testament/assert-equivalent](#testamentassert-equivalent)
