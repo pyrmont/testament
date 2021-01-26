@@ -2,19 +2,7 @@
 
 ## testament
 
-[==](#testament)
-, [assert-deep-equal](#testamentassert-deep-equal)
-, [assert-equal](#testamentassert-equal)
-, [assert-equivalent](#testamentassert-equivalent)
-, [assert-expr](#testamentassert-expr)
-, [assert-thrown](#testamentassert-thrown)
-, [assert-thrown-message](#testamentassert-thrown-message)
-, [deftest](#testamentdeftest)
-, [is](#testamentis)
-, [reset-tests!](#testamentreset-tests)
-, [run-tests!](#testamentrun-tests)
-, [set-on-result-hook](#testamentset-on-result-hook)
-, [set-report-printer](#testamentset-report-printer)
+[==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [is](#is), [reset-tests!](#reset-tests), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer)
 
 ## ==
 
