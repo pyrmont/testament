@@ -1,20 +1,22 @@
 # Testament API
 
-[testament/==](#testament)
-, [testament/assert-deep-equal](#testamentassert-deep-equal)
-, [testament/assert-equal](#testamentassert-equal)
-, [testament/assert-equivalent](#testamentassert-equivalent)
-, [testament/assert-expr](#testamentassert-expr)
-, [testament/assert-thrown](#testamentassert-thrown)
-, [testament/assert-thrown-message](#testamentassert-thrown-message)
-, [testament/deftest](#testamentdeftest)
-, [testament/is](#testamentis)
-, [testament/reset-tests!](#testamentreset-tests)
-, [testament/run-tests!](#testamentrun-tests)
-, [testament/set-on-result-hook](#testamentset-on-result-hook)
-, [testament/set-report-printer](#testamentset-report-printer)
+## testament
 
-## testament/==
+[==](#testament)
+, [assert-deep-equal](#testamentassert-deep-equal)
+, [assert-equal](#testamentassert-equal)
+, [assert-equivalent](#testamentassert-equivalent)
+, [assert-expr](#testamentassert-expr)
+, [assert-thrown](#testamentassert-thrown)
+, [assert-thrown-message](#testamentassert-thrown-message)
+, [deftest](#testamentdeftest)
+, [is](#testamentis)
+, [reset-tests!](#testamentreset-tests)
+, [run-tests!](#testamentrun-tests)
+, [set-on-result-hook](#testamentset-on-result-hook)
+, [set-report-printer](#testamentset-report-printer)
+
+## ==
 
 **function**  | [source][1]
 
@@ -34,7 +36,7 @@ function.
 
 [1]: src/testament.janet#L57
 
-## testament/assert-deep-equal
+## assert-deep-equal
 
 **macro**  | [source][2]
 
@@ -54,7 +56,7 @@ identify the assertion. If no `note` is provided, the form
 
 [2]: src/testament.janet#L371
 
-## testament/assert-equal
+## assert-equal
 
 **macro**  | [source][3]
 
@@ -74,7 +76,7 @@ is used.
 
 [3]: src/testament.janet#L355
 
-## testament/assert-equivalent
+## assert-equivalent
 
 **macro**  | [source][4]
 
@@ -97,7 +99,7 @@ is used.
 
 [4]: src/testament.janet#L387
 
-## testament/assert-expr
+## assert-expr
 
 **macro**  | [source][5]
 
@@ -114,7 +116,7 @@ identify the assertion. If no `note` is provided, the form of `expr` is used.
 
 [5]: src/testament.janet#L342
 
-## testament/assert-thrown
+## assert-thrown
 
 **macro**  | [source][6]
 
@@ -133,7 +135,7 @@ used.
 
 [6]: src/testament.janet#L406
 
-## testament/assert-thrown-message
+## assert-thrown-message
 
 **macro**  | [source][7]
 
@@ -153,7 +155,7 @@ identify the assertion. If no `note` is provided, the form
 
 [7]: src/testament.janet#L422
 
-## testament/deftest
+## deftest
 
 **macro**  | [source][8]
 
@@ -185,7 +187,7 @@ an arity error is raised.
 
 [8]: src/testament.janet#L499
 
-## testament/is
+## is
 
 **macro**  | [source][9]
 
@@ -217,7 +219,7 @@ identify the assertion.
 
 [9]: src/testament.janet#L442
 
-## testament/reset-tests!
+## reset-tests!
 
 **function**  | [source][10]
 
@@ -229,7 +231,7 @@ Reset all reporting variables
 
 [10]: src/testament.janet#L559
 
-## testament/run-tests!
+## run-tests!
 
 **function**  | [source][11]
 
@@ -247,7 +249,7 @@ It accepts two optional arguments:
 
 [11]: src/testament.janet#L537
 
-## testament/set-on-result-hook
+## set-on-result-hook
 
 **function**  | [source][12]
 
@@ -278,7 +280,7 @@ The 'value' of the assertion depends on the kind of assertion:
 
 [12]: src/testament.janet#L140
 
-## testament/set-report-printer
+## set-report-printer
 
 **function**  | [source][13]
 
