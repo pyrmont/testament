@@ -81,6 +81,19 @@
 (test-assert-equivalent-macro)
 
 
+(defn test-assert-matches-macro []
+  (let [summary (t/assert-matches {:a _} {:a 10})]
+    (unless (deep= summary {:kind    :matches
+                            :passed? true
+                            :expect  {:a '_}
+                            :actual  {:a 10}
+                            :note    "(matches {:a _} {:a 10})"})
+     (error "Test failed"))))
+
+
+(test-assert-matches-macro)
+
+
 (defn test-assert-thrown-macro []
   (let [summary (t/assert-thrown (error "An error"))]
     (unless (= summary {:kind    :thrown
@@ -157,6 +170,19 @@
 
 
 (test-is-macro-with-equivalence)
+
+
+(defn test-is-macro-with-matches []
+  (let [summary (t/is (matches {:b _} {:a 10}))]
+    (unless (deep= summary {:kind    :matches
+                            :passed? false
+                            :expect  {:b '_}
+                            :actual  {:a 10}
+                            :note    "(matches {:b _} {:a 10})"})
+     (error "Test failed"))))
+
+
+(test-is-macro-with-matches)
 
 
 (defn test-is-macro-with-thrown []
