@@ -101,6 +101,10 @@
     (string "Expect: " (string/format "%q" (result :expect)) "\n"
             "Actual: " (string/format "%q" (result :actual)))
 
+    :matches
+    (string "Expect: Structure " (string/format "%q" (result :expect)) "\n"
+            "Actual: " (string/format "%q" (result :actual)))
+
     :thrown
     "Reason: No error thrown"
 
@@ -240,6 +244,9 @@
     (and (tuple? assertion) (= 3 (length assertion)) (= '== (first assertion)))
     :equivalent
 
+    (and (tuple? assertion) (= 3 (length assertion)) (= 'matches (first assertion)))
+    :matches
+
     (and (tuple? assertion) (= 2 (length assertion)) (= 'thrown? (first assertion)))
     :thrown
 
@@ -306,6 +313,20 @@
                 :expect  expect
                 :actual  actual
                 :note    (or note (string/format "(== %q %q)" expect-form actual-form))}]
+    (compose-and-record-result result)))
+
+
+(defn- assert-matches*
+  ```
+  Function form of assert-matches
+  ```
+  [structure actual actual-form note]
+  (let [result {:test    curr-test
+                :kind    :matches
+                :passed? (not (nil? (eval (apply match [actual structure true]))))
+                :expect  structure
+                :actual  actual
+                :note    (or note (string/format "(matches %q %q)" structure actual-form))}]
     (compose-and-record-result result)))
 
 
@@ -403,6 +424,21 @@
   ~(,assert-equivalent* ,expect ',expect ,actual ',actual ,note))
 
 
+(defmacro assert-matches
+  ```
+  Assert that `structure` matches `actual` (with an optional `note`)
+
+  The `assert-matches` macro provides a mechanism for creating an assertion that
+  an expression matches a particular structure (at least in part).
+
+  An optional `note` can be included that will be used in any failure result to
+  identify the assertion. If no `note` is provided, the form
+  `(matches structure actual)` is used.
+  ```
+  [structure actual &opt note]
+  ~(,assert-matches* ',structure ,actual ',actual ,note))
+
+
 (defmacro assert-thrown
   ```
   Assert that an expression, `expr`, throws an error (with an optional `note`)
@@ -444,7 +480,7 @@
   Assert that an `assertion` is true (with an optional `note`)
 
   The `is` macro provides a succinct mechanism for creating assertions.
-  Testament includes support for six types of assertions:
+  Testament includes support for seven types of assertions:
 
   1. a generic assertion that asserts the Boolean truth of an expression;
   2. an equality assertion that asserts that an expected result and an actual
@@ -453,8 +489,10 @@
      actual result are deeply equal;
   4. an equivalence assertion that asserts that an expected result and an actual
      result are equivalent;
-  5. a throwing assertion that asserts an error is thrown; and
-  6. a throwing assertion that asserts an error with a specific message is
+  5. a matches assertion that asserts that an expected result matches a
+     particular structure (at least in part);
+  6. a throwing assertion that asserts an error is thrown; and
+  7. a throwing assertion that asserts an error with a specific message is
      thrown.
 
   `is` causes the appropriate assertion to be inserted based on the form of the
@@ -476,6 +514,10 @@
     :equivalent
     (let [[_ expect actual] assertion]
       ~(,assert-equivalent* ,expect ',expect ,actual ',actual ,note))
+
+    :matches
+    (let [[_ structure actual] assertion]
+      ~(,assert-matches* ',structure ,actual ',actual ,note))
 
     :thrown
     (let [[_ form] assertion
