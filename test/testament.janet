@@ -278,5 +278,22 @@
     (unless (empty? (string output))
       (error "Test failed"))))
 
-
 (test-reporting-silent)
+
+(defn test-defsuite! []
+  (var called false)
+  (t/set-on-result-hook (fn [summary]
+                          (unless (= summary {:test    'test-name
+                                              :kind    :equal
+                                              :passed? true
+                                              :expect  1
+                                              :actual  1
+                                              :note   "1"})
+                            (error "Test failed"))
+                          (set called true)))
+  (let [output @""]
+    (with-dyns [:out output]
+      (t/defsuite!
+        (t/deftest test-name (t/assert-equal 1 1 "1"))))
+    (unless called
+      (error "Test failed. on-result-hook was not called."))))
