@@ -576,6 +576,7 @@
 
 ### Test suite functions
 
+
 (defn run-tests!
   ```
   Run the registered tests
@@ -611,3 +612,11 @@
   (set reports @{})
   (set print-reports nil)
   (set on-result-hook (fn [&])))
+
+(defmacro defsuite! [& body]
+  ```
+  Automatically runs the tests defined in the macro body
+  ```
+  ~(do
+     ,;body
+     (,(comptime run-tests!))))
