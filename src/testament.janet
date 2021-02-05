@@ -599,6 +599,22 @@
       (os/exit 1))))
 
 
+(defmacro do-tests
+  ```
+  Automatically run the tests defined in the macro body
+
+  The macro can optionally be provided with a bracketed tuple containing
+  arguments to be passed to `run-tests!`.
+  ```
+  [head & tail]
+  (let [has-args? (and (tuple? head) (= :brackets (tuple/type head)))
+        args      (if has-args? head [])
+        forms     (if has-args? tail [head ;tail])]
+    ~(do
+       ,;forms
+       (,run-tests! ,;args))))
+
+
 (defn reset-tests!
   ```
   Reset all reporting variables
@@ -612,11 +628,3 @@
   (set reports @{})
   (set print-reports nil)
   (set on-result-hook (fn [&])))
-
-(defmacro defsuite! [& body]
-  ```
-  Automatically runs the tests defined in the macro body
-  ```
-  ~(do
-     ,;body
-     (,(comptime run-tests!))))
