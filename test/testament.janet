@@ -7,7 +7,6 @@
   (unless (t/== x y)
     (error "Test failed")))
 
-
 (test-==)
 
 
@@ -16,7 +15,6 @@
   (unless (= :function (type test-name))
     (error "Test failed")))
 
-
 (test-deftest-macro)
 
 
@@ -24,7 +22,6 @@
   (def anon-test (t/deftest :noop))
   (unless (= :function (type anon-test))
     (error "Test failed")))
-
 
 (test-anon-deftest-macro)
 
@@ -38,7 +35,6 @@
                         :note    "1"})
       (error "Test failed"))))
 
-
 (test-assert-expr-macro)
 
 
@@ -50,7 +46,6 @@
                         :actual  1
                         :note    "(= 1 1)"})
       (error "Test failed"))))
-
 
 (test-assert-equal-macro)
 
@@ -64,7 +59,6 @@
                             :note    "(deep= @[1] @[1])"})
       (error "Test failed"))))
 
-
 (test-assert-deep-equal-macro)
 
 
@@ -76,7 +70,6 @@
                             :actual  @[1]
                             :note    "(== [1] @[1])"})
       (error "Test failed"))))
-
 
 (test-assert-equivalent-macro)
 
@@ -90,7 +83,6 @@
                             :note    "(matches {:a _} {:a 10})"})
      (error "Test failed"))))
 
-
 (test-assert-matches-macro)
 
 
@@ -102,7 +94,6 @@
                         :actual  true
                         :note    "thrown? (error \"An error\")"})
       (error "Test failed"))))
-
 
 (test-assert-thrown-macro)
 
@@ -116,7 +107,6 @@
                         :note    "thrown? \"An error\" (error \"An error\")"})
       (error "Test failed"))))
 
-
 (test-assert-thrown-message-macro)
 
 
@@ -128,7 +118,6 @@
                         :actual  true
                         :note    "1"})
       (error "Test failed"))))
-
 
 (test-is-macro-with-value)
 
@@ -142,7 +131,6 @@
                         :note    "(= 1 2)"})
       (error "Test failed"))))
 
-
 (test-is-macro-with-equality)
 
 
@@ -154,7 +142,6 @@
                             :actual  @[2]
                             :note    "(deep= @[1] @[2])"})
       (error "Test failed"))))
-
 
 (test-is-macro-with-deep-equality)
 
@@ -168,7 +155,6 @@
                             :note    "(== [1] @[2])"})
       (error "Test failed"))))
 
-
 (test-is-macro-with-equivalence)
 
 
@@ -180,7 +166,6 @@
                             :actual  {:a 10}
                             :note    "(matches {:b _} {:a 10})"})
      (error "Test failed"))))
-
 
 (test-is-macro-with-matches)
 
@@ -194,7 +179,6 @@
                         :note    "thrown? (error \"An error\")"})
       (error "Test failed"))))
 
-
 (test-is-macro-with-thrown)
 
 
@@ -206,7 +190,6 @@
                         :actual  "An error"
                         :note    "thrown? \"An error\" (error \"An error\")"})
       (error "Test failed"))))
-
 
 (test-is-macro-with-thrown-message)
 
@@ -224,7 +207,6 @@
     (unless (= (string "\n" rule "\n" stats "\n" rule "\n") (string output))
       (error "Test failed"))))
 
-
 (test-reporting)
 
 
@@ -239,7 +221,6 @@
       (t/run-tests!))
     (unless (= (string "CUSTOM:1:1:1:" "\n") (string output))
       (error "Test failed"))))
-
 
 (test-custom-reporting)
 
@@ -264,7 +245,6 @@
     (unless called
       (error "Test failed. on-result-hook was not called."))))
 
-
 (test-on-result-hook)
 
 
@@ -280,20 +260,31 @@
 
 (test-reporting-silent)
 
-(defn test-defsuite! []
-  (var called false)
-  (t/set-on-result-hook (fn [summary]
-                          (unless (= summary {:test    'test-name
-                                              :kind    :equal
-                                              :passed? true
-                                              :expect  1
-                                              :actual  1
-                                              :note   "1"})
-                            (error "Test failed"))
-                          (set called true)))
+
+(t/reset-tests!)
+
+(defn test-do-tests []
+  (let [output @""
+        stats  "1 tests run containing 1 assertions\n1 tests passed, 0 tests failed"
+        len    (->> (string/split "\n" stats) (map length) splice max)
+        rule   (string/repeat "-" len)]
+    (with-dyns [:out output]
+      (t/do-tests
+        (t/deftest test-name (t/assert-equal 1 1))))
+    (unless (= (string "\n" rule "\n" stats "\n" rule "\n") (string output))
+      (error "Test failed"))))
+
+(test-do-tests)
+
+
+(t/reset-tests!)
+
+(defn test-do-tests-silent []
   (let [output @""]
     (with-dyns [:out output]
-      (t/defsuite!
-        (t/deftest test-name (t/assert-equal 1 1 "1"))))
-    (unless called
-      (error "Test failed. on-result-hook was not called."))))
+      (t/do-tests [:silent true]
+        (t/deftest test-name (t/assert-equal 1 1))))
+    (unless (empty? (string output))
+      (error "Test failed"))))
+
+(test-do-tests)
