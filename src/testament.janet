@@ -603,13 +603,14 @@
   ```
   Automatically run the tests defined in the macro body
 
-  The macro can optionally be provided with a bracketed tuple containing
-  arguments to be passed to `run-tests!`.
+  If `first-form` is a bracketed tuple, the items in the tuple are treated as
+  arguments to `run-tests!` and the form is discarded. Otherwise, the form is
+  evaluated.
   ```
-  [head & tail]
-  (let [has-args? (and (tuple? head) (= :brackets (tuple/type head)))
-        args      (if has-args? head [])
-        forms     (if has-args? tail [head ;tail])]
+  [first-form & other-forms]
+  (let [has-args? (and (tuple? first-form) (= :brackets (tuple/type first-form)))
+        args      (if has-args? first-form [])
+        forms     (if has-args? other-forms [first-form ;other-forms])]
     ~(do
        ,;forms
        (,run-tests! ,;args))))
