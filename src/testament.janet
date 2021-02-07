@@ -161,6 +161,7 @@
 
   - `:expr` either `true` or `false`;
   - `:equal` the value specified in the assertion;
+  - `:matches` the structure of the value in the assertion;
   - `:thrown` either `true` or `false`; and
   - `:thrown-message` the error specified in the assertion.
   ```
@@ -589,6 +590,13 @@
 
   Please note that `run-tests!` calls `os/exit` when there are failing tests
   unless the argument `:exit-on-fail` is set to `false`.
+
+  In all other cases, the function returns an indexed collection of test
+  reports. Each report in the collection is a dictionary collection containing
+  three keys: `:test`, `:passes` and `:failures`. `:test` is the name of the
+  test while `:passes` and `:failures` contain the results of each respective
+  passed and failed assertion. Each result is a data structure of the kind
+  described in the docstring for `set-on-result-hook`.
   ```
   [&keys {:silent silent? :exit-on-fail exit?}]
   (default exit? true)
@@ -597,9 +605,9 @@
     (when (nil? print-reports)
       (set-report-printer default-print-reports))
     (print-reports num-tests-run num-asserts num-tests-passed))
-  (when exit?
-    (unless  (= num-tests-run num-tests-passed)
-      (os/exit 1))))
+  (if (and exit? (not (= num-tests-run num-tests-passed)))
+    (os/exit 1)
+    (values reports)))
 
 
 (defn reset-tests!

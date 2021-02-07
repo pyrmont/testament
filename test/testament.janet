@@ -196,6 +196,44 @@
 
 (t/reset-tests!)
 
+(defn test-exit-code-success []
+  (t/deftest test-name (t/assert-equal 1 1))
+  (let [expect @[@{:test     'test-name
+                   :failures @[]
+                   :passes   @[{:test    'test-name
+                                :kind    :equal
+                                :passed? true
+                                :expect  1
+                                :actual  1
+                                :note    "(= 1 1)"}]}]
+        actual (t/run-tests! :silent true)]
+    (unless (deep= expect actual)
+      (error "Test failed"))))
+
+(test-exit-code-success)
+
+
+(t/reset-tests!)
+
+(defn test-exit-code-failure []
+  (t/deftest test-name (t/assert-equal 1 2))
+  (let [expect @[@{:test     'test-name
+                   :passes   @[]
+                   :failures @[{:test    'test-name
+                                :kind    :equal
+                                :passed? false
+                                :expect  1
+                                :actual  2
+                                :note    "(= 1 2)"}]}]
+        actual (t/run-tests! :silent true :exit-on-fail false)]
+    (unless (deep= expect actual)
+      (error "Test failed"))))
+
+(test-exit-code-failure)
+
+
+(t/reset-tests!)
+
 (defn test-reporting []
   (t/deftest test-name (t/assert-equal 1 1))
   (let [output @""
