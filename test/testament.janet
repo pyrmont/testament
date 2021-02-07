@@ -263,28 +263,28 @@
 
 (t/reset-tests!)
 
-(defn test-do-tests []
+(defn test-exercise! []
   (let [output @""
         stats  "1 tests run containing 1 assertions\n1 tests passed, 0 tests failed"
         len    (->> (string/split "\n" stats) (map length) splice max)
         rule   (string/repeat "-" len)]
     (with-dyns [:out output]
-      (t/do-tests
+      (t/exercise! []
         (t/deftest test-name (t/assert-equal 1 1))))
     (unless (= (string "\n" rule "\n" stats "\n" rule "\n") (string output))
       (error "Test failed"))))
 
-(test-do-tests)
+(test-exercise!)
 
 
 (t/reset-tests!)
 
-(defn test-do-tests-silent []
+(defn test-exercise!-silent []
   (let [output @""]
     (with-dyns [:out output]
-      (t/do-tests [:silent true]
+      (t/exercise! [:silent true]
         (t/deftest test-name (t/assert-equal 1 1))))
     (unless (empty? (string output))
       (error "Test failed"))))
 
-(test-do-tests)
+(test-exercise!-silent)

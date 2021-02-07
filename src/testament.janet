@@ -586,6 +586,9 @@
 
   1. `:silent` whether to omit the printing of reports (default: `false`); and
   2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
+
+  Please note that `run-tests!` calls `os/exit` when there are failing tests
+  unless the argument `:exit-on-fail` is set to `false`.
   ```
   [&keys {:silent silent? :exit-on-fail exit?}]
   (default exit? true)
@@ -597,23 +600,6 @@
   (when exit?
     (unless  (= num-tests-run num-tests-passed)
       (os/exit 1))))
-
-
-(defmacro do-tests
-  ```
-  Automatically run the tests defined in the macro body
-
-  If `first-form` is a bracketed tuple, the items in the tuple are treated as
-  arguments to `run-tests!` and the form is discarded. Otherwise, the form is
-  evaluated.
-  ```
-  [first-form & other-forms]
-  (let [has-args? (and (tuple? first-form) (= :brackets (tuple/type first-form)))
-        args      (if has-args? first-form [])
-        forms     (if has-args? other-forms [first-form ;other-forms])]
-    ~(do
-       ,;forms
-       (,run-tests! ,;args))))
 
 
 (defn reset-tests!
@@ -629,3 +615,26 @@
   (set reports @{})
   (set print-reports nil)
   (set on-result-hook (fn [&])))
+
+
+(defmacro exercise!
+  ```
+  Define, run and reset the tests provided in the macro body
+
+  This macro will run the forms in `body`, call `run-test!`, call `reset-tests!`
+  and then return the value of `run-tests!`.
+
+  The user can specify the arguments to be passed to `run-tests!` by providing a
+  tuple as `args`. If no arguments are necessary, `args` should be an empty
+  tuple.
+
+  Please note that, like `run-tests!`, `exercise!` calls `os/exit` when there
+  are failing tests unless the argument `:exit-on-fail` is set to `false`.
+  ```
+  [args & body]
+  (let [exit-code (gensym)]
+    ~(do
+       ,;body
+       (def ,exit-code (,run-tests! ,;args))
+       (,reset-tests!)
+       ,exit-code)))
