@@ -68,7 +68,7 @@
                             :passed? true
                             :expect  [1]
                             :actual  @[1]
-                            :note    "(== [1] @[1])"})
+                            :note    "(== (1) @[1])"})
       (error "Test failed"))))
 
 (test-assert-equivalent-macro)
@@ -152,7 +152,7 @@
                             :passed? false
                             :expect  [1]
                             :actual  @[2]
-                            :note    "(== [1] @[2])"})
+                            :note    "(== (1) @[2])"})
       (error "Test failed"))))
 
 (test-is-macro-with-equivalence)
