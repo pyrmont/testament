@@ -28,15 +28,15 @@ jobs:
     - name: extract janet
       run: tar -xvzf janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
     - name: add directory to path
-      run: echo "janet-${{ steps.janet-ver.outputs.tag }}-linux" >> $GITHUB_PATH
+      run: echo "janet-${{ steps.janet-ver.outputs.tag }}-linux/bin" >> $GITHUB_PATH
     - name: make modules directory
       run: mkdir modules
     - name: set JANET_PATH
       run: echo "JANET_PATH=modules" >> $GITHUB_ENV
     - name: set JANET_LIBPATH
-      run: echo "JANET_LIBPATH=janet-${{ steps.janet-ver.outputs.tag }}-linux" >> $GITHUB_ENV
+      run: echo "JANET_LIBPATH=janet-${{ steps.janet-ver.outputs.tag }}-linux/lib" >> $GITHUB_ENV
     - name: set JANET_HEADERPATH
-      run: echo "JANET_HEADERPATH=janet-${{ steps.janet-ver.outputs.tag }}-linux" >> $GITHUB_ENV
+      run: echo "JANET_HEADERPATH=janet-${{ steps.janet-ver.outputs.tag }}-linux/include" >> $GITHUB_ENV
     - name: install dependencies
       run: /usr/bin/env jpm deps
     - name: run tests
