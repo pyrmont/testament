@@ -203,7 +203,7 @@
   been registered in the test suite.
   ```
   [name t]
-  (unless (nil? (tests name))
+  (unless (or (nil? (tests name)) (true? (dyn :testament-allow-redefining-tests)))
     (error "cannot register tests with the same name"))
   (set (tests name) t))
 
