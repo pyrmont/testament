@@ -200,7 +200,8 @@
   Register a test `t` with a `name `in the test suite
 
   This function will raise an error if a test with the same `name` has already
-  been registered in the test suite.
+  been registered in the test suite, unless the dynamic variable
+  :testament-allow-redefining-tests has been set to true.
   ```
   [name t]
   (unless (or (nil? (tests name)) (true? (dyn :testament-allow-redefining-tests)))
