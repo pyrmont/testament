@@ -17,6 +17,26 @@
 
 (test-deftest-macro)
 
+(defn test-deftest-same-name-macro []
+  (t/deftest same-name :noop)
+  (try
+    (do
+      (t/deftest same-name :noop)
+      (error "Redefining a test with the same name should have failed"))
+    ([err fib]
+     (unless (= err "cannot register tests with the same name")
+       (propagate err fib)))))
+
+(test-deftest-same-name-macro)
+
+(defn test-deftest-same-name-allowed-macro []
+  (with-dyns [:testament-allow-redefining-tests true]
+    (t/deftest same-name-allowed :noop)
+    (t/deftest same-name-allowed :nop)
+    (unless (= :function (type same-name-allowed))
+      (error "Test failed"))))
+
+(test-deftest-same-name-allowed-macro)
 
 (defn test-anon-deftest-macro []
   (def anon-test (t/deftest :noop))
