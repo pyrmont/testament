@@ -201,10 +201,10 @@
 
   This function will raise an error if a test with the same `name` has already
   been registered in the test suite, unless the dynamic variable
-  *testament-repl-mode* has been set to true.
+  :testament-repl-mode has been set to true.
   ```
   [name t]
-  (unless (or (nil? (tests name)) (true? (dyn *testament-repl-mode*)))
+  (unless (or (nil? (tests name)) (true? (dyn :testament-repl-mode)))
     (error "cannot register tests with the same name"))
   (set (tests name) t))
 
@@ -606,7 +606,7 @@
     (when (nil? print-reports)
       (set-report-printer default-print-reports))
     (print-reports num-tests-run num-asserts num-tests-passed))
-  (if (and exit? (not (= num-tests-run num-tests-passed)) (not (true? (dyn *testament-repl-mode*))))
+  (if (and exit? (not (= num-tests-run num-tests-passed)) (not (true? (dyn :testament-repl-mode))))
     (os/exit 1)
     (values reports)))
 
