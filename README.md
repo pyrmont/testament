@@ -56,12 +56,18 @@ Actual: 4
 -----------------------------------
 ```
 
-Note for REPL users:
+### Note for REPL users
+
 By default, Testament prevents defining two tests with the same name. If you're repeatedly evaluating a test file in REPL, this will cause your re-evaluated `deftest` to fail.
 
 Set the dynamic variable `:testament-allow-redefining-tests` to `true` to disable this check, e.g. with:
 ```
 (setdyn :testament-allow-redefining-tests true)
+```
+
+You'll also want to pass `:exit-on-fail false` to `run-tests!`, otherwise Testament will quit your REPL if a test fails.
+```
+(run-tests! :exit-on-fail false)
 ```
 
 ## API
