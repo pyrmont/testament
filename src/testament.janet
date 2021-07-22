@@ -591,7 +591,7 @@
   (set print-reports nil)
   (set on-result-hook (fn [&])))
 
-(defn- empty-module-cache []
+(defn empty-module-cache! []
   "Empties module/cache to prevent caching between test runs in the same process"
   (each key (keys module/cache)
     (put module/cache key nil)))
@@ -631,8 +631,9 @@
     (os/exit 1)
     (values reports))
   (if (true? (dyn :testament-repl-mode))
-    (reset-tests!)
-    (empty-module-cache)))
+    (do
+      (reset-tests!)
+      (empty-module-cache!))))
 
 (defmacro exercise!
   ```
