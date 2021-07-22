@@ -627,13 +627,17 @@
     (when (nil? print-reports)
       (set-report-printer default-print-reports))
     (print-reports num-tests-run num-asserts num-tests-passed))
-  (if (and exit? (not (= num-tests-run num-tests-passed)) (not (true? (dyn :testament-repl-mode))))
-    (os/exit 1)
-    (values reports))
-  (if (true? (dyn :testament-repl-mode))
+
+  (def repl-mode? (true? (dyn :testament-repl-mode)))
+  (def report-values (values reports))
+
+  (if (and exit? (not (= num-tests-run num-tests-passed)) (not repl-mode?))
+    (os/exit 1))
+  (if repl-mode?
     (do
       (reset-tests!)
-      (empty-module-cache!))))
+      (empty-module-cache!)))
+  report-values)
 
 (defmacro exercise!
   ```

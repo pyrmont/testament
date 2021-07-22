@@ -30,7 +30,7 @@
 (test-deftest-same-name-macro)
 
 (defn test-deftest-same-name-allowed-macro []
-  (with-dyns [:testament-allow-redefining-tests true]
+  (with-dyns [:testament-repl-mode true]
     (t/deftest same-name-allowed :noop)
     (t/deftest same-name-allowed :nop)
     (unless (= :function (type same-name-allowed))
