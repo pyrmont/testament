@@ -65,7 +65,7 @@ Set the dynamic variable `:testament-repl-mode` to `true` to disable this check,
 (setdyn :testament-repl-mode true)
 ```
 
-This will also stop Testament from exiting your REPL if a test fails.
+This will also stop Testament from exiting your REPL if a test fails, reset the reports between runs, and empty the `module/cache` to prevent old code from running.
 
 
 ## API
