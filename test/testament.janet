@@ -326,3 +326,42 @@
       (error "Test failed"))))
 
 (test-exercise!-silent)
+
+(t/reset-tests!)
+
+(defn test-fixtures []
+  (defn create-fixture [_] {:new-fixture "useful value"})
+  (defn second-fixture [ctx] {:another-fixture (string (ctx :new-fixture) "!")})
+
+  (t/with-fixtures
+    [create-fixture second-fixture]
+    (t/deftest test-name
+               {:another-fixture f}
+               (t/assert-equal "useful value!" f)))
+
+  (let [output @""]
+    (with-dyns [:out output]
+      (t/run-tests! :silent true))
+    (unless (empty? (string output))
+      (error "Test failed"))))
+
+(test-fixtures)
+
+(t/reset-tests!)
+
+(defn test-anon-fixtures []
+  (defn create-fixture [_] {:new-fixture "useful value"})
+  (defn second-fixture [ctx] {:another-fixture (string (ctx :new-fixture) "!")})
+
+  (t/with-fixtures
+    [create-fixture second-fixture]
+    (t/deftest {:another-fixture f}
+               (t/assert-equal "useful value!" f)))
+
+  (let [output @""]
+    (with-dyns [:out output]
+      (t/run-tests! :silent true))
+    (unless (empty? (string output))
+      (error "Test failed"))))
+
+(test-anon-fixtures)

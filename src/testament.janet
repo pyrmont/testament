@@ -14,6 +14,7 @@
 (var- curr-test nil)
 (var- tests @{})
 (var- reports @{})
+(var- test-setups @{})
 (var- print-reports nil)
 (var- on-result-hook (fn [&]))
 
@@ -214,7 +215,13 @@
   ```
   [name]
   (set curr-test name)
-  (put reports name @{:test name :passes @[] :failures @[]}))
+  # Initialize reports for this test
+  (put reports name @{:test name :passes @[] :failures @[]})
+  # Run setup functions
+  (let [test-context @{}]
+    (each context-fn (or (test-setups name) @[])
+      (merge-into test-context (context-fn test-context)))
+    test-context))
 
 
 (defn- teardown-test
@@ -549,6 +556,10 @@
   the test. If a test with the same name has already been defined, `deftest`
   will raise an error.
 
+  The second optional argument is dictionary of fixtures. This should map keys in
+  the fixture context (see `with-fixtures`) to symbols which will be available for
+  use in the test.
+
   A test is just a function. `args` (excluding the first argument if that
   argument is a symbol) is used as the body of the function. Testament adds
   respective calls to a setup function and a teardown function before and after
@@ -567,16 +578,39 @@
   (when (or (zero? (length args))
             (and (one? (length args)) (= :symbol (type (first args)))))
     (error "arity mismatch"))
-  (let [[name body] (if (= :symbol (type (first args))) [(first args) (slice args 1)]
-                                                        [(symbol "test" (gensym)) args])]
-    ~(def ,name (,register-test ',name (fn []
-                                         (,setup-test ',name)
-                                         ,;body
-                                         (,teardown-test ',name))))))
 
+  (with-syms [test-context]
+    (let [[name body] (if (symbol? (first args))
+                        [(first args) (slice args 1)]
+                        [(symbol "test" (gensym)) args])
+          [bindings body] (if (dictionary? (first body))
+                            [(first body) (slice body 1)]
+                            [{} body])
+          body ~(let [,bindings ,test-context] ,;body)]
+      ~(def ,name (,register-test ',name (fn ,name []
+                                           (def ,test-context (,setup-test ',name))
+                                           ,body
+                                           (,teardown-test ',name)))))))
+
+(defn with-fixtures
+  ```
+  Declare fixture functions to be run before the tests defined in this scope.
+
+  `setups` should be a sequence of fixture functions. `tests` should be one or
+  more calls to `deftest`. Every test defined in this scope will have all the
+  functions in `setups` run, in order, before running the test.
+
+  A fixture function is a function that takes a single argument, the current
+  fixture context, and returns a dictionary of fixtures to be added to the fixture
+  context. The tests defined in scope can then bind to any of the fixtures and
+  use them in the test.
+  ```
+  [setups & tests]
+  (each test tests
+    (let [test-name (symbol (disasm test :name))]
+      (put test-setups test-name setups))))
 
 ### Test suite functions
-
 
 (defn run-tests!
   ```

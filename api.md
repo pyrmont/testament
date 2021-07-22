@@ -2,7 +2,7 @@
 
 ## testament
 
-[==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [exercise!](#exercise), [is](#is), [reset-tests!](#reset-tests), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer)
+[==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [exercise!](#exercise), [is](#is), [reset-tests!](#reset-tests), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer), [with-fixtures](#with-fixtures)
 
 ## ==
 
@@ -22,7 +22,7 @@ tuples).
 Instances of `math/nan` are considered equivalent for the purposes of this
 function.
 
-[1]: src/testament.janet#L57
+[1]: src/testament.janet#L58
 
 ## assert-deep-equal
 
@@ -42,7 +42,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `(deep= expect actual)` is used.
 
-[2]: src/testament.janet#L393
+[2]: src/testament.janet#L400
 
 ## assert-equal
 
@@ -62,7 +62,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[3]: src/testament.janet#L377
+[3]: src/testament.janet#L384
 
 ## assert-equivalent
 
@@ -85,7 +85,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(== expect actual)`
 is used.
 
-[4]: src/testament.janet#L409
+[4]: src/testament.janet#L416
 
 ## assert-expr
 
@@ -102,7 +102,7 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[5]: src/testament.janet#L364
+[5]: src/testament.janet#L371
 
 ## assert-matches
 
@@ -121,7 +121,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `(matches structure actual)` is used.
 
-[6]: src/testament.janet#L428
+[6]: src/testament.janet#L435
 
 ## assert-thrown
 
@@ -140,7 +140,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `thrown? expr` is
 used.
 
-[7]: src/testament.janet#L443
+[7]: src/testament.janet#L450
 
 ## assert-thrown-message
 
@@ -160,7 +160,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `thrown? expect expr` is used.
 
-[8]: src/testament.janet#L459
+[8]: src/testament.janet#L466
 
 ## deftest
 
@@ -178,6 +178,10 @@ test. Otherwise, Testament uses `gensym` to generate a unique symbol to name
 the test. If a test with the same name has already been defined, `deftest`
 will raise an error.
 
+The second optional argument is dictionary of fixtures. This should map keys in
+the fixture context (see `with-fixtures`) to symbols which will be available for
+use in the test.
+
 A test is just a function. `args` (excluding the first argument if that
 argument is a symbol) is used as the body of the function. Testament adds
 respective calls to a setup function and a teardown function before and after
@@ -192,7 +196,7 @@ guaranteed.
 If `deftest` is called with no arguments or if the only argument is a symbol,
 an arity error is raised.
 
-[9]: src/testament.janet#L542
+[9]: src/testament.janet#L549
 
 ## exercise!
 
@@ -214,7 +218,7 @@ tuple.
 Please note that, like `run-tests!`, `exercise!` calls `os/exit` when there
 are failing tests unless the argument `:exit-on-fail` is set to `false`.
 
-[10]: src/testament.janet#L628
+[10]: src/testament.janet#L662
 
 ## is
 
@@ -248,7 +252,7 @@ asserted expression.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion.
 
-[11]: src/testament.janet#L479
+[11]: src/testament.janet#L486
 
 ## reset-tests!
 
@@ -260,7 +264,7 @@ identify the assertion.
 
 Reset all reporting variables
 
-[12]: src/testament.janet#L613
+[12]: src/testament.janet#L647
 
 ## run-tests!
 
@@ -288,7 +292,7 @@ test while `:passes` and `:failures` contain the results of each respective
 passed and failed assertion. Each result is a data structure of the kind
 described in the docstring for `set-on-result-hook`.
 
-[13]: src/testament.janet#L581
+[13]: src/testament.janet#L615
 
 ## set-on-result-hook
 
@@ -320,7 +324,7 @@ The 'value' of the assertion depends on the kind of assertion:
 - `:thrown` either `true` or `false`; and
 - `:thrown-message` the error specified in the assertion.
 
-[14]: src/testament.janet#L144
+[14]: src/testament.janet#L145
 
 ## set-report-printer
 
@@ -341,5 +345,26 @@ The function `f` will be applied with the following three arguments:
 The function will not be called if `run-tests!` is called with `:silent` set
 to `true`.
 
-[15]: src/testament.janet#L75
+[15]: src/testament.janet#L76
+
+## with-fixtures
+
+**function**  | [source][16]
+
+```janet
+(with-fixtures setups & tests)
+```
+
+Declare fixture functions to be run before the tests defined in this scope.
+
+`setups` should be a sequence of fixture functions. `tests` should be one or
+more calls to `deftest`. Every test defined in this scope will have all the
+functions in `setups` run, in order, before running the test.
+
+A fixture function is a function that takes a single argument, the current
+fixture context, and returns a dictionary of fixtures to be added to the fixture
+context. The tests defined in scope can then bind to any of the fixtures and
+use them in the test.
+
+[16]: src/testament.janet#L595
 
