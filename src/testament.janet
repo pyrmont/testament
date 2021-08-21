@@ -199,13 +199,12 @@
   ```
   Register a test `t` with a `name `in the test suite
 
-  This function will raise an error if a test with the same `name` has already
-  been registered in the test suite, unless the dynamic variable
-  :testament-repl-mode has been set to true.
+  This function will print a warning to `:err` if a test with the same `name`
+  has already been registered in the test suite.
   ```
   [name t]
-  (unless (or (nil? (tests name)) (true? (dyn :testament-repl-mode)))
-    (error "cannot register tests with the same name"))
+  (unless (nil? (tests name))
+    (eprint "[testament] registered multiple tests with the same name"))
   (set (tests name) t))
 
 
@@ -591,10 +590,14 @@
   (set print-reports nil)
   (set on-result-hook (fn [&])))
 
+
 (defn empty-module-cache! []
-  "Empties module/cache to prevent caching between test runs in the same process"
+  ```
+  Empties module/cache to prevent caching between test runs in the same process
+  ```
   (each key (keys module/cache)
     (put module/cache key nil)))
+
 
 (defn run-tests!
   ```
@@ -607,8 +610,8 @@
   2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
 
   Please note that `run-tests!` calls `os/exit` when there are failing tests
-  unless the argument `:exit-on-fail` is set to `false` or the `:testament-repl-mode`
-  dyn is set to `true`.
+  unless the argument `:exit-on-fail` is set to `false` or the
+  `:testament-repl-mode` dynamic variable is set to `true`.
 
   In all other cases, the function returns an indexed collection of test
   reports. Each report in the collection is a dictionary collection containing
@@ -617,8 +620,9 @@
   passed and failed assertion. Each result is a data structure of the kind
   described in the docstring for `set-on-result-hook`.
 
-  When in `:testament-repl-mode`, this will also reset the test reports and empty
-  the module/cache to provide a fresh run with the most up-to-date code.
+  When the dynamic variable `:testament-repl-mode` is set to `true`, this will
+  also reset the test reports and empty the module/cache to provide a fresh run
+  with the most up-to-date code.
   ```
   [&keys {:silent silent? :exit-on-fail exit?}]
   (default exit? true)
@@ -631,13 +635,15 @@
   (def repl-mode? (true? (dyn :testament-repl-mode)))
   (def report-values (values reports))
 
-  (if (and exit? (not (= num-tests-run num-tests-passed)) (not repl-mode?))
+  (if (and exit?
+           (not (= num-tests-run num-tests-passed))
+           (not repl-mode?))
     (os/exit 1))
-  (if repl-mode?
-    (do
-      (reset-tests!)
-      (empty-module-cache!)))
+  (when repl-mode?
+    (reset-tests!)
+    (empty-module-cache!))
   report-values)
+
 
 (defmacro exercise!
   ```
