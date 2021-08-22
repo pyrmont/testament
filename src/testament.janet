@@ -98,19 +98,19 @@
   [result]
   (case (result :kind)
     :equal
-    (string "Expect: " (string/format "%q" (result :expect)) "\n"
-            "Actual: " (string/format "%q" (result :actual)))
+    (string "Expect (L): " (string/format "%q" (result :expect)) "\n"
+            "Actual (R): " (string/format "%q" (result :actual)))
 
     :matches
-    (string "Expect: Structure " (string/format "%q" (result :expect)) "\n"
-            "Actual: " (string/format "%q" (result :actual)))
+    (string "Expect (L): Structure " (string/format "%q" (result :expect)) "\n"
+            "Actual (R): " (string/format "%q" (result :actual)))
 
     :thrown
     "Reason: No error thrown"
 
     :thrown-message
-    (string "Expect: Error message " (string/format "%q" (result :expect)) "\n"
-            "Actual: Error message " (string/format "%q" (result :actual)))
+    (string "Expect (L): Error message " (string/format "%q" (result :expect)) "\n"
+            "Actual (R): Error message " (string/format "%q" (result :actual)))
 
     :expr
     "Reason: Result is Boolean false"))
