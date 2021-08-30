@@ -30,6 +30,7 @@ jobs:
         echo "JANET_HEADERPATH=$PREFIX/include" >> $GITHUB_ENV
         echo "JANET_BINPATH=$PREFIX/bin" >> $GITHUB_ENV
         echo "JANET_LIBPATH=$PREFIX/lib" >> $GITHUB_ENV
+        echo "JANET_MANPATH=$PREFIX/man" >> $GITHUB_ENV
         echo "JANET_PATH=$PREFIX/modules" >> $GITHUB_ENV
     - name: make directories
       run: |
