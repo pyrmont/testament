@@ -12,41 +12,5 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: checkout project
-      uses: actions/checkout@v2
-      with:
-        submodules: false
-    - name: find latest version of janet
-      uses: oprypin/find-latest-tag@v1
-      with:
-        repository: janet-lang/janet
-        releases-only: true
-        prefix: 'v'
-      id: janet-ver
-    - name: set prefix
-      run: echo "PREFIX=$GITHUB_WORKSPACE/.janet" >> $GITHUB_ENV
-    - name: set paths
-      run: |
-        echo "JANET_HEADERPATH=$PREFIX/include" >> $GITHUB_ENV
-        echo "JANET_BINPATH=$PREFIX/bin" >> $GITHUB_ENV
-        echo "JANET_LIBPATH=$PREFIX/lib" >> $GITHUB_ENV
-        echo "JANET_MANPATH=$PREFIX/man" >> $GITHUB_ENV
-        echo "JANET_PATH=$PREFIX/modules" >> $GITHUB_ENV
-    - name: make directories
-      run: |
-        mkdir -p .janet/modules
-        mkdir -p build/jpm
-    - name: download janet
-      run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver.outputs.tag }}/janet-${{ steps.janet-ver.outputs.tag }}-linux-x64.tar.gz
-    - name: extract janet
-      run: tar -xzf janet-${{ steps.janet-ver.outputs.tag }}-linux-x64.tar.gz --strip-components=2 -C $PREFIX
-    - name: download jpm
-      run: git clone --depth=1 https://github.com/janet-lang/jpm.git build/jpm
-    - name: install jpm
-      run: cd build/jpm && $PREFIX/bin/janet ./bootstrap.janet
-    - name: return to workspace directory
-      run: cd $GITHUB_WORKSPACE
-    - name: install dependencies
-      run: $PREFIX/bin/jpm deps
-    - name: run tests
-      run: $PREFIX/bin/jpm test
+    - name: "Test project"
+      uses: pyrmont/action-janet-test@master
