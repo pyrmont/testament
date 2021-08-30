@@ -31,7 +31,6 @@ jobs:
         echo "JANET_BINPATH=$PREFIX/bin" >> $GITHUB_ENV
         echo "JANET_LIBPATH=$PREFIX/lib" >> $GITHUB_ENV
         echo "JANET_PATH=$PREFIX/modules" >> $GITHUB_ENV
-        echo "$PREFIX/bin" >> $GITHUB_PATH
     - name: make directories
       run: |
         mkdir -p .janet/modules
@@ -43,10 +42,10 @@ jobs:
     - name: download jpm
       run: git clone --depth=1 https://github.com/janet-lang/jpm.git build/jpm
     - name: install jpm
-      run: cd build/jpm && /usr/bin/env janet ./bootstrap.janet
+      run: cd build/jpm && $PREFIX/bin/janet ./bootstrap.janet
     - name: return to home directory
       run: cd
     - name: install dependencies
-      run: /usr/bin/env jpm deps
+      run: $PREFIX/bin/jpm deps
     - name: run tests
-      run: /usr/bin/env jpm test
+      run: $PREFIX/bin/jpm test
