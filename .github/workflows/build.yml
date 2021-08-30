@@ -24,7 +24,7 @@ jobs:
         prefix: 'v'
       id: janet-ver
     - name: set prefix
-      run: echo "PREFIX=~/.janet" >> $GITHUB_ENV
+      run: echo "PREFIX=$HOME/.janet" >> $GITHUB_ENV
     - name: set paths
       run: |
         echo "JANET_HEADERPATH=$PREFIX/include" >> $GITHUB_ENV
