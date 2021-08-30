@@ -47,8 +47,8 @@ running test/example.janet ...
 
 > Failed: two-plus-two
 Assertion: 2 + 2 = 5
-Expect: 5
-Actual: 4
+Expect (L): 5
+Actual (R): 4
 
 -----------------------------------
 2 tests run containing 2 assertions
