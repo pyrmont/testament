@@ -23,20 +23,26 @@ jobs:
         releases-only: true
         prefix: 'v'
       id: janet-ver
+    - name: set paths
+      run: |
+        echo "PREFIX=.janet" >> $GITHUB_ENV
+        echo "JANET_HEADERPATH=$PREFIX/include" >> $GITHUB_ENV
+        echo "JANET_BINPATH=$PREFIX/bin" >> $GITHUB_ENV
+        echo "JANET_LIBPATH=$PREFIX/lib" >> $GITHUB_ENV
+        echo "JANET_PATH=$PREFIX/modules" >> $GITHUB_ENV
+        echo "$PREFIX/bin" >> $GITHUB_PATH
+    - name: make directories
+      run: |
+        mkdir -p .janet/modules
+        mkdir -p build/jpm
     - name: download janet
-      run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver.outputs.tag }}/janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
+      run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver.outputs.tag }}/janet-${{ steps.janet-ver.outputs.tag }}-linux-x64.tar.gz
     - name: extract janet
-      run: tar -xvzf janet-${{ steps.janet-ver.outputs.tag }}-linux.tar.gz
-    - name: add directory to path
-      run: echo "janet-${{ steps.janet-ver.outputs.tag }}-linux/bin" >> $GITHUB_PATH
-    - name: make modules directory
-      run: mkdir modules
-    - name: set JANET_PATH
-      run: echo "JANET_PATH=modules" >> $GITHUB_ENV
-    - name: set JANET_LIBPATH
-      run: echo "JANET_LIBPATH=janet-${{ steps.janet-ver.outputs.tag }}-linux/lib" >> $GITHUB_ENV
-    - name: set JANET_HEADERPATH
-      run: echo "JANET_HEADERPATH=janet-${{ steps.janet-ver.outputs.tag }}-linux/include" >> $GITHUB_ENV
+      run: tar -xzf janet-${{ steps.janet-ver.outputs.tag }}-linux-x64.tar.gz --strip-components=2 -C $PREFIX
+    - name: download jpm
+      run: git clone --depth=1 https://github.com/janet-lang/jpm.git build/jpm
+    - name: install jpm
+      run: /usr/bin/env janet build/jpm/bootstrap.janet
     - name: install dependencies
       run: /usr/bin/env jpm deps
     - name: run tests
