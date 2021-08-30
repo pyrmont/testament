@@ -43,7 +43,9 @@ jobs:
     - name: download jpm
       run: git clone --depth=1 https://github.com/janet-lang/jpm.git build/jpm
     - name: install jpm
-      run: /usr/bin/env janet build/jpm/bootstrap.janet
+      run: cd build/jpm && /usr/bin/env janet ./bootstrap.janet
+    - name: return to home directory
+      run: cd
     - name: install dependencies
       run: /usr/bin/env jpm deps
     - name: run tests
