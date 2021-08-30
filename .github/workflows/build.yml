@@ -23,9 +23,10 @@ jobs:
         releases-only: true
         prefix: 'v'
       id: janet-ver
+    - name: set prefix
+      run: echo "PREFIX=.janet" >> $GITHUB_ENV
     - name: set paths
       run: |
-        echo "PREFIX=.janet" >> $GITHUB_ENV
         echo "JANET_HEADERPATH=$PREFIX/include" >> $GITHUB_ENV
         echo "JANET_BINPATH=$PREFIX/bin" >> $GITHUB_ENV
         echo "JANET_LIBPATH=$PREFIX/lib" >> $GITHUB_ENV
