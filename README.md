@@ -58,16 +58,16 @@ Actual (R): 4
 
 ### In REPLs
 
-To use Tetament in a REPL set the dynamic variable `:testament-repl?` to
+To use Testament in a REPL, set the dynamic variable `:testament-repl?` to
 `true`:
 
 ```
 (setdyn :testament-repl? true)
 ```
 
-This will (a) stop Testament from the your REPL if a test fails, (b) reset the
-reports between runs and (c) empty the `module/cache` to prevent old code from
-running.
+This will (a) stop Testament from exiting your REPL if a test fails, (b) reset
+the reports between runs and (c) empty the `module/cache` to prevent old code
+from running.
 
 
 ## API
