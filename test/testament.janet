@@ -18,6 +18,17 @@
 (test-deftest-macro)
 
 
+(defn test-deftest-same-name-macro []
+  (t/deftest same-name :noop)
+  (def err @"")
+  (with-dyns [:err err]
+    (t/deftest same-name :noop)
+    (unless (= (string err) "[testament] registered multiple tests with the same name\n")
+      (error "no warning"))))
+
+(test-deftest-same-name-macro)
+
+
 (defn test-anon-deftest-macro []
   (def anon-test (t/deftest :noop))
   (unless (= :function (type anon-test))

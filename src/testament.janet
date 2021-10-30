@@ -199,12 +199,12 @@
   ```
   Register a test `t` with a `name `in the test suite
 
-  This function will raise an error if a test with the same `name` has already
-  been registered in the test suite.
+  This function will print a warning to `:err` if a test with the same `name`
+  has already been registered in the test suite.
   ```
   [name t]
   (unless (nil? (tests name))
-    (error "cannot register tests with the same name"))
+    (eprint "[testament] registered multiple tests with the same name"))
   (set (tests name) t))
 
 
@@ -577,37 +577,12 @@
 
 ### Test suite functions
 
-
-(defn run-tests!
+(defn- empty-module-cache! []
   ```
-  Run the registered tests
-
-  This function will run the tests registered in the test suite via `deftest`.
-  It accepts two optional arguments:
-
-  1. `:silent` whether to omit the printing of reports (default: `false`); and
-  2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
-
-  Please note that `run-tests!` calls `os/exit` when there are failing tests
-  unless the argument `:exit-on-fail` is set to `false`.
-
-  In all other cases, the function returns an indexed collection of test
-  reports. Each report in the collection is a dictionary collection containing
-  three keys: `:test`, `:passes` and `:failures`. `:test` is the name of the
-  test while `:passes` and `:failures` contain the results of each respective
-  passed and failed assertion. Each result is a data structure of the kind
-  described in the docstring for `set-on-result-hook`.
+  Empty module/cache to prevent caching between test runs in the same process
   ```
-  [&keys {:silent silent? :exit-on-fail exit?}]
-  (default exit? true)
-  (each test (values tests) (test))
-  (unless silent?
-    (when (nil? print-reports)
-      (set-report-printer default-print-reports))
-    (print-reports num-tests-run num-asserts num-tests-passed))
-  (if (and exit? (not (= num-tests-run num-tests-passed)))
-    (os/exit 1)
-    (values reports)))
+  (each key (keys module/cache)
+    (put module/cache key nil)))
 
 
 (defn reset-tests!
@@ -623,6 +598,52 @@
   (set reports @{})
   (set print-reports nil)
   (set on-result-hook (fn [&])))
+
+
+(defn run-tests!
+  ```
+  Run the registered tests
+
+  This function will run the tests registered in the test suite via `deftest`.
+  It accepts two optional arguments:
+
+  1. `:silent` whether to omit the printing of reports (default: `false`); and
+  2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
+
+  Please note that `run-tests!` calls `os/exit` when there are failing tests
+  unless the argument `:exit-on-fail` is set to `false` or the
+  `:testament-repl?` dynamic variable is set to `true`.
+
+  In all other cases, the function returns an indexed collection of test
+  reports. Each report in the collection is a dictionary collection containing
+  three keys: `:test`, `:passes` and `:failures`. `:test` is the name of the
+  test while `:passes` and `:failures` contain the results of each respective
+  passed and failed assertion. Each result is a data structure of the kind
+  described in the docstring for `set-on-result-hook`.
+
+  When the dynamic variable `:testament-repl?` is set to `true`, this will
+  also reset the test reports and empty the module/cache to provide a fresh run
+  with the most up-to-date code.
+  ```
+  [&keys {:silent silent? :exit-on-fail exit?}]
+  (default exit? true)
+  (each test (values tests) (test))
+  (unless silent?
+    (when (nil? print-reports)
+      (set-report-printer default-print-reports))
+    (print-reports num-tests-run num-asserts num-tests-passed))
+
+  (def in-repl? (dyn :testament-repl?))
+  (def report-values (values reports))
+
+  (when (and exit?
+             (not (= num-tests-run num-tests-passed))
+             (not in-repl?))
+    (os/exit 1))
+  (when in-repl?
+    (reset-tests!)
+    (empty-module-cache!))
+  report-values)
 
 
 (defmacro exercise!
