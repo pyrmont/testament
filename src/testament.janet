@@ -576,6 +576,15 @@
 
 
 ### Test suite functions
+
+(defn- empty-module-cache! []
+  ```
+  Empty module/cache to prevent caching between test runs in the same process
+  ```
+  (each key (keys module/cache)
+    (put module/cache key nil)))
+
+
 (defn reset-tests!
   ```
   Reset all reporting variables
@@ -591,14 +600,6 @@
   (set on-result-hook (fn [&])))
 
 
-(defn empty-module-cache! []
-  ```
-  Empties module/cache to prevent caching between test runs in the same process
-  ```
-  (each key (keys module/cache)
-    (put module/cache key nil)))
-
-
 (defn run-tests!
   ```
   Run the registered tests
@@ -611,7 +612,7 @@
 
   Please note that `run-tests!` calls `os/exit` when there are failing tests
   unless the argument `:exit-on-fail` is set to `false` or the
-  `:testament-repl-mode` dynamic variable is set to `true`.
+  `:testament-repl?` dynamic variable is set to `true`.
 
   In all other cases, the function returns an indexed collection of test
   reports. Each report in the collection is a dictionary collection containing
@@ -620,7 +621,7 @@
   passed and failed assertion. Each result is a data structure of the kind
   described in the docstring for `set-on-result-hook`.
 
-  When the dynamic variable `:testament-repl-mode` is set to `true`, this will
+  When the dynamic variable `:testament-repl?` is set to `true`, this will
   also reset the test reports and empty the module/cache to provide a fresh run
   with the most up-to-date code.
   ```
@@ -632,14 +633,14 @@
       (set-report-printer default-print-reports))
     (print-reports num-tests-run num-asserts num-tests-passed))
 
-  (def repl-mode? (true? (dyn :testament-repl-mode)))
+  (def in-repl? (dyn :testament-repl?))
   (def report-values (values reports))
 
-  (if (and exit?
-           (not (= num-tests-run num-tests-passed))
-           (not repl-mode?))
+  (when (and exit?
+             (not (= num-tests-run num-tests-passed))
+             (not in-repl?))
     (os/exit 1))
-  (when repl-mode?
+  (when in-repl?
     (reset-tests!)
     (empty-module-cache!))
   report-values)

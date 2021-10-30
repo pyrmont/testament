@@ -47,8 +47,8 @@ running test/example.janet ...
 
 > Failed: two-plus-two
 Assertion: 2 + 2 = 5
-Expect: 5
-Actual: 4
+Expect (L): 5
+Actual (R): 4
 
 -----------------------------------
 2 tests run containing 2 assertions
@@ -56,21 +56,17 @@ Actual: 4
 -----------------------------------
 ```
 
-### Note for REPL users
+### In REPLs
 
-By default, Testament prevents defining two tests with the same name. If you're
-repeatedly evaluating a test file in REPL, this will cause your re-evaluated
-`deftest` to fail.
-
-Set the dynamic variable `:testament-repl-mode` to `true` to disable this
-check, e.g. with:
+To use Tetament in a REPL set the dynamic variable `:testament-repl?` to
+`true`:
 
 ```
-(setdyn :testament-repl-mode true)
+(setdyn :testament-repl? true)
 ```
 
-This will also stop Testament from exiting your REPL if a test fails, reset the
-reports between runs, and empty the `module/cache` to prevent old code from
+This will (a) stop Testament from the your REPL if a test fails, (b) reset the
+reports between runs and (c) empty the `module/cache` to prevent old code from
 running.
 
 

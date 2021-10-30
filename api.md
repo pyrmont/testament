@@ -214,7 +214,7 @@ tuple.
 Please note that, like `run-tests!`, `exercise!` calls `os/exit` when there
 are failing tests unless the argument `:exit-on-fail` is set to `false`.
 
-[10]: src/testament.janet#L628
+[10]: src/testament.janet#L649
 
 ## is
 
@@ -260,7 +260,7 @@ identify the assertion.
 
 Reset all reporting variables
 
-[12]: src/testament.janet#L613
+[12]: src/testament.janet#L588
 
 ## run-tests!
 
@@ -279,7 +279,8 @@ It accepts two optional arguments:
 2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
 
 Please note that `run-tests!` calls `os/exit` when there are failing tests
-unless the argument `:exit-on-fail` is set to `false`.
+unless the argument `:exit-on-fail` is set to `false` or the
+`:testament-repl?` dynamic variable is set to `true`.
 
 In all other cases, the function returns an indexed collection of test
 reports. Each report in the collection is a dictionary collection containing
@@ -288,7 +289,11 @@ test while `:passes` and `:failures` contain the results of each respective
 passed and failed assertion. Each result is a data structure of the kind
 described in the docstring for `set-on-result-hook`.
 
-[13]: src/testament.janet#L581
+When the dynamic variable `:testament-repl?` is set to `true`, this will
+also reset the test reports and empty the module/cache to provide a fresh run
+with the most up-to-date code.
+
+[13]: src/testament.janet#L603
 
 ## set-on-result-hook
 
