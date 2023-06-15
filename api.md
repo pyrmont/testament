@@ -2,7 +2,7 @@
 
 ## testament
 
-[==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [exercise!](#exercise), [is](#is), [reset-tests!](#reset-tests), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer)
+[==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [exercise!](#exercise), [is](#is), [reset-tests!](#reset-tests), [review](#review), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer)
 
 ## ==
 
@@ -262,9 +262,26 @@ Reset all reporting variables
 
 [12]: src/testament.janet#L588
 
+## review
+
+**macro**  | [source][13]
+
+```janet
+(review path & args)
+```
+
+Import all bindings as public in the specified module
+
+This macro performs similarly to `import`. The difference is that it sets all
+the bindings as public. This is intended for situations where it is not
+desirable to make bindings public but the user would still like to be able to
+subject the bindings to testing.
+
+[13]: src/testament.janet#L695
+
 ## run-tests!
 
-**function**  | [source][13]
+**function**  | [source][14]
 
 ```janet
 (run-tests! &keys {:exit-on-fail exit? :silent silent?})
@@ -293,11 +310,11 @@ When the dynamic variable `:testament-repl?` is set to `true`, this will
 also reset the test reports and empty the module/cache to provide a fresh run
 with the most up-to-date code.
 
-[13]: src/testament.janet#L603
+[14]: src/testament.janet#L603
 
 ## set-on-result-hook
 
-**function**  | [source][14]
+**function**  | [source][15]
 
 ```janet
 (set-on-result-hook f)
@@ -325,11 +342,11 @@ The 'value' of the assertion depends on the kind of assertion:
 - `:thrown` either `true` or `false`; and
 - `:thrown-message` the error specified in the assertion.
 
-[14]: src/testament.janet#L144
+[15]: src/testament.janet#L144
 
 ## set-report-printer
 
-**function**  | [source][15]
+**function**  | [source][16]
 
 ```janet
 (set-report-printer f)
@@ -346,5 +363,5 @@ The function `f` will be applied with the following three arguments:
 The function will not be called if `run-tests!` is called with `:silent` set
 to `true`.
 
-[15]: src/testament.janet#L75
+[16]: src/testament.janet#L75
 
