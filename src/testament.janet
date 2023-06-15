@@ -667,3 +667,42 @@
        (def ,exit-code (,run-tests! ,;args))
        (,reset-tests!)
        ,exit-code)))
+
+
+# Review macro
+
+(defn- review-1
+  ```
+  Function form of the review macro
+  ```
+  [path & args]
+  (def env (curenv))
+  (def kargs (table ;args))
+  (def {:as as
+        :prefix pfx
+        :export ep} kargs)
+  (def newenv (require path ;args))
+  (each [k v] (pairs newenv)
+    (when (and (dictionary? v) (v :value))
+      (put v :private nil)))
+  (def prefix (or
+                (and as (string as "/"))
+                pfx
+                (string (last (string/split "/" path)) "/")))
+  (merge-module env newenv prefix))
+
+
+(defmacro review
+  ```
+  Import all bindings as public in the specified module
+
+  This macro performs similarly to `import`. The difference is that it sets all
+  the bindings as public. This is intended for situations where it is not
+  desirable to make bindings public but the user would still like to be able to
+  subject the bindings to testing.
+  ```
+  [path & args]
+  (def path (string path))
+  (def ps (partition 2 args))
+  (def argm (mapcat (fn [[k v]] [k (if (= k :as) (string v) v)]) ps))
+  (tuple review-1 (string path) ;argm))
