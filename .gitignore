@@ -1,2 +1,3 @@
 /build/
-/modules/
+/jpm_tree/
+.DS_Store
