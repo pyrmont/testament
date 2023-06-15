@@ -683,7 +683,7 @@
         :export ep} kargs)
   (def newenv (require path ;args))
   (each [k v] (pairs newenv)
-    (when (and (dictionary? v) (v :value))
+    (when (dictionary? v)
       (put v :private nil)))
   (def prefix (or
                 (and as (string as "/"))
