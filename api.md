@@ -1,6 +1,5 @@
 # Testament API
 
-## testament
 
 [==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [exercise!](#exercise), [is](#is), [reset-tests!](#reset-tests), [review](#review), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer)
 
@@ -22,7 +21,7 @@ tuples).
 Instances of `math/nan` are considered equivalent for the purposes of this
 function.
 
-[1]: src/testament.janet#L57
+[1]: lib/testament.janet#L57
 
 ## assert-deep-equal
 
@@ -42,7 +41,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `(deep= expect actual)` is used.
 
-[2]: src/testament.janet#L393
+[2]: lib/testament.janet#L393
 
 ## assert-equal
 
@@ -62,7 +61,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(= expect actual)`
 is used.
 
-[3]: src/testament.janet#L377
+[3]: lib/testament.janet#L377
 
 ## assert-equivalent
 
@@ -85,7 +84,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `(== expect actual)`
 is used.
 
-[4]: src/testament.janet#L409
+[4]: lib/testament.janet#L409
 
 ## assert-expr
 
@@ -102,7 +101,7 @@ The `assert-expr` macro provides a mechanism for creating a generic assertion.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form of `expr` is used.
 
-[5]: src/testament.janet#L364
+[5]: lib/testament.janet#L364
 
 ## assert-matches
 
@@ -121,7 +120,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `(matches structure actual)` is used.
 
-[6]: src/testament.janet#L428
+[6]: lib/testament.janet#L428
 
 ## assert-thrown
 
@@ -140,7 +139,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form `thrown? expr` is
 used.
 
-[7]: src/testament.janet#L443
+[7]: lib/testament.janet#L443
 
 ## assert-thrown-message
 
@@ -160,7 +159,7 @@ An optional `note` can be included that will be used in any failure result to
 identify the assertion. If no `note` is provided, the form
 `thrown? expect expr` is used.
 
-[8]: src/testament.janet#L459
+[8]: lib/testament.janet#L459
 
 ## deftest
 
@@ -192,7 +191,7 @@ guaranteed.
 If `deftest` is called with no arguments or if the only argument is a symbol,
 an arity error is raised.
 
-[9]: src/testament.janet#L542
+[9]: lib/testament.janet#L542
 
 ## exercise!
 
@@ -214,7 +213,7 @@ tuple.
 Please note that, like `run-tests!`, `exercise!` calls `os/exit` when there
 are failing tests unless the argument `:exit-on-fail` is set to `false`.
 
-[10]: src/testament.janet#L649
+[10]: lib/testament.janet#L649
 
 ## is
 
@@ -248,7 +247,7 @@ asserted expression.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion.
 
-[11]: src/testament.janet#L479
+[11]: lib/testament.janet#L479
 
 ## reset-tests!
 
@@ -260,7 +259,7 @@ identify the assertion.
 
 Reset all reporting variables
 
-[12]: src/testament.janet#L588
+[12]: lib/testament.janet#L588
 
 ## review
 
@@ -277,14 +276,14 @@ the bindings as public. This is intended for situations where it is not
 desirable to make bindings public but the user would still like to be able to
 subject the bindings to testing.
 
-[13]: src/testament.janet#L695
+[13]: lib/testament.janet#L695
 
 ## run-tests!
 
 **function**  | [source][14]
 
 ```janet
-(run-tests! &keys {:exit-on-fail exit? :silent silent?})
+(run-tests! &keys {:silent silent? :exit-on-fail exit?})
 ```
 
 Run the registered tests
@@ -310,7 +309,7 @@ When the dynamic variable `:testament-repl?` is set to `true`, this will
 also reset the test reports and empty the module/cache to provide a fresh run
 with the most up-to-date code.
 
-[14]: src/testament.janet#L603
+[14]: lib/testament.janet#L603
 
 ## set-on-result-hook
 
@@ -342,7 +341,7 @@ The 'value' of the assertion depends on the kind of assertion:
 - `:thrown` either `true` or `false`; and
 - `:thrown-message` the error specified in the assertion.
 
-[15]: src/testament.janet#L144
+[15]: lib/testament.janet#L144
 
 ## set-report-printer
 
@@ -363,5 +362,5 @@ The function `f` will be applied with the following three arguments:
 The function will not be called if `run-tests!` is called with `:silent` set
 to `true`.
 
-[16]: src/testament.janet#L75
+[16]: lib/testament.janet#L75
 

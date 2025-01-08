@@ -1,4 +1,4 @@
-(import ../src/testament :as t :exit true)
+(import ../lib/testament :as t :exit true)
 
 
 (defn test-== []

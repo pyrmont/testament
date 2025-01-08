@@ -7,4 +7,6 @@
   :repo "git+https://github.com/pyrmont/testament")
 
 (declare-source
-  :source ["src/testament.janet"])
+  :source ["lib"
+           "init.janet"]
+  :prefix "testament")
