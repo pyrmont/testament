@@ -59,7 +59,7 @@ Actual (R): 4
 To use Testament in a REPL, set the dynamic variable `:testament-repl?` to
 `true`:
 
-```
+```janet
 (setdyn :testament-repl? true)
 ```
 
