@@ -2,17 +2,15 @@
 
 [![Build Status](https://github.com/pyrmont/testament/workflows/build/badge.svg)](https://github.com/pyrmont/testament/actions?query=workflow%3Abuild)
 
-Testament is a testing library for Janet. It takes inspiration from Joy's
-[Tester][] library and Clojure's [clojure.test][] library.
+Testament is a testing library for Janet. It takes inspiration Clojure's [clojure.test][] library.
 
-[Tester]: https://github.com/joy-framework/tester
 [clojure.test]: https://clojure.github.io/clojure/clojure.test-api.html
 
 ## Installation
 
 Add the dependency to your `project.janet` file:
 
-```clojure
+```janet
 (declare-project
   :dependencies ["https://github.com/pyrmont/testament"])
 ```
@@ -22,8 +20,8 @@ Add the dependency to your `project.janet` file:
 Testament can be used like this:
 
 
-```clojure
-(import testament :prefix "" :exit true)
+```janet
+(use testament)
 
 (deftest one-plus-one
   (is (= 2 (+ 1 1)) "1 + 1 = 2"))
