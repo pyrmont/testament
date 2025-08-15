@@ -627,7 +627,18 @@
   ```
   [&keys {:silent silent? :exit-on-fail exit?}]
   (default exit? true)
-  (each test (values tests) (test))
+  (each [name test] (pairs tests)
+    (cond
+      # if specific tests to run, run test if specified
+      (dyn :tests)
+      (when (has-value? (dyn :tests) name)
+        (test))
+      # if specific tests to skip, run test unless specified
+      (dyn :skips)
+      (unless (has-value? (dyn :tests) name)
+        (test))
+      # otherwise always run test
+      (test)))
   (unless silent?
     (when (nil? print-reports)
       (set-report-printer default-print-reports))

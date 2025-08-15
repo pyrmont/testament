@@ -337,3 +337,45 @@
       (error "Test failed"))))
 
 (test-exercise!-silent)
+
+
+(t/reset-tests!)
+
+(defn test-call-tests []
+  (setdyn :tests ['test-name1])
+  (t/deftest test-name1 (t/assert-equal 1 1))
+  (t/deftest test-name2 (t/assert-equal 1 1))
+  (let [expect @[@{:test     'test-name1
+                   :failures @[]
+                   :passes   @[{:test    'test-name1
+                                :kind    :equal
+                                :passed? true
+                                :expect  1
+                                :actual  1
+                                :note    "(= 1 1)"}]}]
+        actual (t/run-tests! :silent true)]
+    (unless (deep= expect actual)
+      (error "Test failed"))))
+
+(test-call-tests)
+
+
+(t/reset-tests!)
+
+(defn test-skip-tests []
+  (setdyn :skips ['test-name2])
+  (t/deftest test-name1 (t/assert-equal 1 1))
+  (t/deftest test-name2 (t/assert-equal 1 1))
+  (let [expect @[@{:test     'test-name1
+                   :failures @[]
+                   :passes   @[{:test    'test-name1
+                                :kind    :equal
+                                :passed? true
+                                :expect  1
+                                :actual  1
+                                :note    "(= 1 1)"}]}]
+        actual (t/run-tests! :silent true)]
+    (unless (deep= expect actual)
+      (error "Test failed"))))
+
+(test-skip-tests)
