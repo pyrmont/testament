@@ -1,0 +1,10 @@
+{:name "testament"
+ :version "DEVEL"
+ :description "A testing library for Janet"
+ :author "Michael Camilleri"
+ :license "MIT"
+ :url "https://github.com/pyrmont/testament"
+ :repo "git+https://github.com/pyrmont/testament"
+
+ :source {:prefix "testament"
+          :files ["lib" "init.janet"]}}

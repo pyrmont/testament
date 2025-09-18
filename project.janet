@@ -1,12 +1,14 @@
-(declare-project
-  :name "Testament"
-  :description "A testing library for Janet"
-  :author "Michael Camilleri"
-  :license "MIT"
-  :url "https://github.com/pyrmont/testament"
-  :repo "git+https://github.com/pyrmont/testament")
+(def info (-> (slurp "info.jdn") parse))
 
-(declare-source
-  :source ["lib"
-           "init.janet"]
-  :prefix "testament")
+(declare-project
+  :name (info :name)
+  :description (info :description)
+  :author (info :author)
+  :license (info :license)
+  :url (info :url)
+  :repo (info :repo))
+
+(task "install" []
+  (if (bundle/installed? (info :name))
+    (bundle/replace (info :name) ".")
+    (bundle/install ".")))
