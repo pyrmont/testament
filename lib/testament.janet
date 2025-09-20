@@ -56,7 +56,7 @@
 
 (defn ==
   ```
-  Return true if the arguments are equivalent
+  Returns true if the arguments are equivalent
 
   The arguments are considered equivalent for the purposes of this function if
   they are of equivalent types and have the same structure. Types are equivalent
@@ -74,7 +74,7 @@
 
 (defn set-report-printer
   ```
-  Set the `print-reports` function
+  Sets the `print-reports` function
 
   The function `f` will be applied with the following three arguments:
 
@@ -93,7 +93,7 @@
 
 (defn- failure-message
   ```
-  Return the appropriate failure message for the given result
+  Returns the appropriate failure message for the given result
   ```
   [result]
   (case (result :kind)
@@ -118,7 +118,7 @@
 
 (defn- default-print-reports
   ```
-  Print reports
+  Prints reports
   ```
   [num-tests-run num-asserts num-tests-passed]
   (each report reports
@@ -143,7 +143,7 @@
 
 (defn set-on-result-hook
   ```
-  Set the `on-result-hook`
+  Sets the `on-result-hook`
 
   The function `f` will be invoked when a result becomes available. The
   function is called with a single argument, the `result`. The `result` is a
@@ -173,7 +173,7 @@
 
 (defn- add-to-report
   ```
-  Add `result` to the report for test `name`
+  Adds `result` to the report for test `name`
   ```
   [result]
   (if-let [name   (result :test)
@@ -184,7 +184,7 @@
 
 (defn- compose-and-record-result
   ```
-  Compose a result and record it if applicable
+  Composes a result and records it if applicable
   ```
   [result]
   (++ num-asserts)
@@ -197,7 +197,7 @@
 
 (defn- register-test
   ```
-  Register a test `t` with a `name `in the test suite
+  Registers a test `t` with a `name `in the test suite
 
   This function will print a warning to `:err` if a test with the same `name`
   has already been registered in the test suite.
@@ -210,7 +210,7 @@
 
 (defn- setup-test
   ```
-  Perform tasks to setup the test, `name`
+  Performs tasks to setup the test, `name`
   ```
   [name]
   (set curr-test name)
@@ -219,7 +219,7 @@
 
 (defn- teardown-test
   ```
-  Perform tasks to teardown the test, `name`
+  Performs tasks to teardown the test, `name`
   ```
   [name]
   (++ num-tests-run)
@@ -232,7 +232,7 @@
 
 (defn- which
   ```
-  Determine the type of assertion being performed
+  Determines the type of assertion being performed
   ```
   [assertion]
   (cond
@@ -262,7 +262,7 @@
 
 (defn- assert-expr*
   ```
-  Function form of assert-expr
+  Functional form of assert-expr
   ```
   [expr form note]
   (let [passed? (not (not expr))
@@ -277,7 +277,7 @@
 
 (defn- assert-equal*
   ```
-  Function form of assert-equal
+  Functional form of assert-equal
   ```
   [expect expect-form actual actual-form note]
   (let [result {:test    curr-test
@@ -291,7 +291,7 @@
 
 (defn- assert-deep-equal*
   ```
-  Function form of assert-deep-equal
+  Functional form of assert-deep-equal
   ```
   [expect expect-form actual actual-form note]
   (let [result {:test    curr-test
@@ -305,7 +305,7 @@
 
 (defn- assert-equivalent*
   ```
-  Function form of assert-equivalent
+  Functional form of assert-equivalent
   ```
   [expect expect-form actual actual-form note]
   (let [result {:test    curr-test
@@ -319,7 +319,7 @@
 
 (defn- assert-matches*
   ```
-  Function form of assert-matches
+  Functional form of assert-matches
   ```
   [structure actual actual-form note]
   (let [result {:test    curr-test
@@ -333,7 +333,7 @@
 
 (defn- assert-thrown*
   ```
-  Function form of assert-thrown
+  Functional form of assert-thrown
   ```
   [thrown? form note]
   (let [result {:test    curr-test
@@ -347,7 +347,7 @@
 
 (defn- assert-thrown-message*
   ```
-  Function form of assert-thrown-message
+  Functional form of assert-thrown-message
   ```
   [thrown? form expect-message expect-form actual-message note]
   (let [result {:test    curr-test
@@ -363,7 +363,7 @@
 
 (defmacro assert-expr
   ```
-  Assert that the expression, `expr`, is true (with an optional `note`)
+  Asserts that the expression, `expr`, is true (with an optional `note`)
 
   The `assert-expr` macro provides a mechanism for creating a generic assertion.
 
@@ -376,7 +376,7 @@
 
 (defmacro assert-equal
   ```
-  Assert that `expect` is equal to `actual` (with an optional `note`)
+  Asserts that `expect` is equal to `actual` (with an optional `note`)
 
   The `assert-equal` macro provides a mechanism for creating an assertion that
   an expected result is equal to the actual result. The forms of `expect` and
@@ -392,7 +392,7 @@
 
 (defmacro assert-deep-equal
   ```
-  Assert that `expect` is deeply equal to `actual` (with an optional `note`)
+  Asserts that `expect` is deeply equal to `actual` (with an optional `note`)
 
   The `assert-deep-equal` macro provides a mechanism for creating an assertion
   that an expected result is deeply equal to the actual result. The forms of
@@ -408,7 +408,7 @@
 
 (defmacro assert-equivalent
   ```
-  Assert that `expect` is equivalent to `actual` (with an optional `note`)
+  Asserts that `expect` is equivalent to `actual` (with an optional `note`)
 
   The `assert-equivalent` macro provides a mechanism for creating an assertion
   that an expected result is equivalent to the actual result. Testament
@@ -427,7 +427,7 @@
 
 (defmacro assert-matches
   ```
-  Assert that `structure` matches `actual` (with an optional `note`)
+  Asserts that `structure` matches `actual` (with an optional `note`)
 
   The `assert-matches` macro provides a mechanism for creating an assertion that
   an expression matches a particular structure (at least in part).
@@ -442,7 +442,7 @@
 
 (defmacro assert-thrown
   ```
-  Assert that an expression, `expr`, throws an error (with an optional `note`)
+  Asserts that an expression, `expr`, throws an error (with an optional `note`)
 
   The `assert-thrown` macro provides a mechanism for creating an assertion that
   an expression throws an error.
@@ -458,7 +458,7 @@
 
 (defmacro assert-thrown-message
   ```
-  Assert that the expression, `expr`, throws an error with the message `expect`
+  Asserts that the expression, `expr`, throws an error with the message `expect`
   (with an optional `note`)
 
   The `assert-thrown` macro provides a mechanism for creating an assertion that
@@ -478,7 +478,7 @@
 
 (defmacro is
   ```
-  Assert that an `assertion` is true (with an optional `note`)
+  Asserts that an `assertion` is true (with an optional `note`)
 
   The `is` macro provides a succinct mechanism for creating assertions.
   Testament includes support for seven types of assertions:
@@ -541,7 +541,7 @@
 
 (defmacro deftest
   ```
-  Define a test and register it in the test suite
+  Defines a test and registers it in the test suite
 
   The `deftest` macro can be used to create named tests and anonymous tests. If
   the first argument is a symbol, that argument is treated as the name of the
@@ -556,9 +556,9 @@
 
   In addition to creating a function, `deftest` registers the test in the 'test
   suite'. Testament's test suite is a global table of tests that have been
-  registered by `deftest`. When a user calls `run-tests!`, each test in the
-  test suite is called. The order in which each test is called is not
-  guaranteed.
+  registered by `deftest`. When a user calls `run-tests!` without specifying any
+  tests to run, each test in the test suite is called. The order in which each
+  test is called is not guaranteed.
 
   If `deftest` is called with no arguments or if the only argument is a symbol,
   an arity error is raised.
@@ -579,7 +579,7 @@
 
 (defn- empty-module-cache! []
   ```
-  Empty module/cache to prevent caching between test runs in the same process
+  Empties module/cache to prevent caching between test runs in the same process
   ```
   (each key (keys module/cache)
     (put module/cache key nil)))
@@ -587,7 +587,7 @@
 
 (defn reset-tests!
   ```
-  Reset all reporting variables
+  Resets all reporting variables
   ```
   []
   (set num-tests-run 0)
@@ -602,10 +602,11 @@
 
 (defn run-tests!
   ```
-  Run the registered tests
+  Runs the tests specified or alternatively the registered tests
 
-  This function will run the tests registered in the test suite via `deftest`.
-  It accepts two optional arguments:
+  This function will run the tests specified or alternatively the tests
+  registered in the test suite via `deftest`. It accepts two optional
+  arguments:
 
   1. `:silent` whether to omit the printing of reports (default: `false`); and
   2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
@@ -626,7 +627,6 @@
   with the most up-to-date code.
   ```
   [&keys {:silent silent? :exit-on-fail exit?}]
-  (default exit? true)
   (each [name test] (pairs tests)
     (cond
       # if specific tests to run, run test if specified
@@ -659,7 +659,7 @@
 
 (defmacro exercise!
   ```
-  Define, run and reset the tests provided in the macro body
+  Defines, runs and resets the tests provided in the macro body
 
   This macro will run the forms in `body`, call `run-test!`, call `reset-tests!`
   and then return the value of `run-tests!`.
@@ -684,7 +684,7 @@
 
 (defn- review-1
   ```
-  Function form of the review macro
+  Functional form of the review macro
   ```
   [path & args]
   (def env (curenv))
@@ -705,7 +705,7 @@
 
 (defmacro review
   ```
-  Import all bindings as public in the specified module
+  Imports all bindings as public in the specified module
 
   This macro performs similarly to `import`. The difference is that it sets all
   the bindings as public. This is intended for situations where it is not
