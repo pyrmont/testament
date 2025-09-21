@@ -205,7 +205,7 @@
 (test-is-macro-with-thrown-message)
 
 
-(t/reset-tests!)
+(t/reset-all!)
 
 (defn test-exit-code-success []
   (t/deftest test-name (t/assert-equal 1 1))
@@ -224,7 +224,7 @@
 (test-exit-code-success)
 
 
-(t/reset-tests!)
+(t/reset-all!)
 
 (defn test-exit-code-failure []
   (t/deftest test-name (t/assert-equal 1 2))
@@ -243,7 +243,7 @@
 (test-exit-code-failure)
 
 
-(t/reset-tests!)
+(t/reset-all!)
 
 (defn test-reporting []
   (t/deftest test-name (t/assert-equal 1 1))
@@ -259,7 +259,7 @@
 (test-reporting)
 
 
-(t/reset-tests!)
+(t/reset-all!)
 
 (defn test-custom-reporting []
   (t/set-report-printer (fn [notests noasserts nopassed]
@@ -274,7 +274,7 @@
 (test-custom-reporting)
 
 
-(t/reset-tests!)
+(t/reset-all!)
 
 (defn test-on-result-hook []
   (var called false)
@@ -297,7 +297,7 @@
 (test-on-result-hook)
 
 
-(t/reset-tests!)
+(t/reset-all!)
 
 (defn test-reporting-silent []
   (t/deftest test-name (t/assert-equal 1 1))
@@ -310,7 +310,7 @@
 (test-reporting-silent)
 
 
-(t/reset-tests!)
+(t/reset-all!)
 
 (defn test-exercise! []
   (let [output @""
@@ -326,7 +326,7 @@
 (test-exercise!)
 
 
-(t/reset-tests!)
+(t/reset-all!)
 
 (defn test-exercise!-silent []
   (let [output @""]
@@ -339,7 +339,27 @@
 (test-exercise!-silent)
 
 
-(t/reset-tests!)
+(t/reset-all!)
+
+(defn test-call-test []
+  (t/deftest testname (t/assert-equal 1 2))
+  (let [output @""]
+    (with-dyns [:out output]
+      (testname))
+    (def expect
+      ```
+      > Failed: testname
+      Assertion: (= 1 2)
+      Expect (L): 1
+      Actual (R): 2
+      ```)
+    (unless (= (string expect "\n") (string output))
+      (error "Test failed"))))
+
+(test-call-test)
+
+
+(t/reset-all!)
 
 (defn test-call-tests []
   (setdyn :tests ['test-name1])
@@ -360,7 +380,7 @@
 (test-call-tests)
 
 
-(t/reset-tests!)
+(t/reset-all!)
 
 (defn test-skip-tests []
   (setdyn :skips ['test-name2])

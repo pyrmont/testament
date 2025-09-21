@@ -5,6 +5,10 @@
 ## Thanks to Sean Walker (for tester) and to Stuart Sierra (for clojure.test),
 ## both of which served as inspirations.
 
+### Default values
+
+(defn- default-result-hook [&])
+
 
 ### Globals used by the reporting functions
 
@@ -14,8 +18,9 @@
 (var- curr-test nil)
 (var- tests @{})
 (var- reports @{})
-(var- print-reports nil)
-(var- on-result-hook (fn [&]))
+(var- print-reports-fn nil)
+(var- print-result-fn nil)
+(var- on-result-hook default-result-hook)
 
 
 ### Equivalence functions
@@ -74,7 +79,7 @@
 
 (defn set-report-printer
   ```
-  Sets the `print-reports` function
+  Sets the function to print reports during `run-tests!`
 
   The function `f` will be applied with the following three arguments:
 
@@ -82,12 +87,27 @@
   2. number of assertions (as integer); and
   3. number of tests passed (as integer).
 
-  The function will not be called if `run-tests!` is called with `:silent` set
+  A default printer function is used if no function has been set. In all cases,
+  the function will not be called if `run-tests!` is called with `:silent` set
   to `true`.
   ```
   [f]
   (if (= :function (type f))
-    (set print-reports f)
+    (set print-reports-fn f)
+    (error "argument not of type :function")))
+
+
+(defn set-result-printer
+  ```
+  Sets the function to print after calling a `deftest`-defined function
+
+  The function `f` will be applied with no arguments.
+
+  A default printer function is used if no function has been set.
+  ```
+  [f]
+  (if (= :function (type f))
+    (set print-result-fn f)
     (error "argument not of type :function")))
 
 
@@ -116,18 +136,30 @@
     "Reason: Result is Boolean false"))
 
 
-(defn- default-print-reports
-  ```
-  Prints reports
-  ```
-  [num-tests-run num-asserts num-tests-passed]
+(defn- default-print-result
+  []
   (each report reports
     (unless (empty? (report :failures))
       (do
-        (print "\n> Failed: " (report :test))
+        (print "> Failed: " (report :test))
         (each failure (report :failures)
           (print "Assertion: " (failure :note))
-          (print (failure-message failure))))))
+          (print (failure-message failure)))))))
+
+
+(defn- print-result
+  ```
+  Prints result
+  ```
+  []
+  (if (nil? print-result-fn)
+    (default-print-result)
+    (print-result-fn)))
+
+
+(defn- default-print-reports
+  [num-tests-run num-asserts num-tests-passed]
+  (print-result)
   (let [stats (string num-tests-run " tests run containing "
                       num-asserts " assertions\n"
                       num-tests-passed " tests passed, "
@@ -137,6 +169,16 @@
     (print (string/repeat "-" len))
     (print stats)
     (print (string/repeat "-" len))))
+
+
+(defn- print-reports
+  ```
+  Prints reports
+  ```
+  [num-tests-run num-asserts num-tests-passed]
+  (if (nil? print-reports-fn)
+    (default-print-reports num-tests-run num-asserts num-tests-passed)
+    (print-reports-fn num-tests-run num-asserts num-tests-passed)))
 
 
 ### Recording functions
@@ -537,45 +579,7 @@
     ~(,assert-expr* ,assertion ',assertion ,note)))
 
 
-### Test definition macro
-
-(defmacro deftest
-  ```
-  Defines a test and registers it in the test suite
-
-  The `deftest` macro can be used to create named tests and anonymous tests. If
-  the first argument is a symbol, that argument is treated as the name of the
-  test. Otherwise, Testament uses `gensym` to generate a unique symbol to name
-  the test. If a test with the same name has already been defined, `deftest`
-  will raise an error.
-
-  A test is just a function. `args` (excluding the first argument if that
-  argument is a symbol) is used as the body of the function. Testament adds
-  respective calls to a setup function and a teardown function before and after
-  the forms in the body.
-
-  In addition to creating a function, `deftest` registers the test in the 'test
-  suite'. Testament's test suite is a global table of tests that have been
-  registered by `deftest`. When a user calls `run-tests!` without specifying any
-  tests to run, each test in the test suite is called. The order in which each
-  test is called is not guaranteed.
-
-  If `deftest` is called with no arguments or if the only argument is a symbol,
-  an arity error is raised.
-  ```
-  [& args]
-  (when (or (zero? (length args))
-            (and (one? (length args)) (= :symbol (type (first args)))))
-    (error "arity mismatch"))
-  (let [[name body] (if (= :symbol (type (first args))) [(first args) (slice args 1)]
-                                                        [(symbol "test" (gensym)) args])]
-    ~(def ,name (,register-test ',name (fn []
-                                         (,setup-test ',name)
-                                         ,;body
-                                         (,teardown-test ',name))))))
-
-
-### Test suite functions
+### Test resets
 
 (defn- empty-module-cache! []
   ```
@@ -596,9 +600,75 @@
   (set curr-test nil)
   (set tests @{})
   (set reports @{})
-  (set print-reports nil)
-  (set on-result-hook (fn [&])))
+  nil)
 
+
+(defn reset-all!
+  ```
+  Resets all reporting variables and settings
+  ```
+  []
+  (reset-tests!)
+  (set print-reports-fn nil)
+  (set print-result-fn nil)
+  (set on-result-hook default-result-hook)
+  nil)
+
+
+### Test definition macro
+
+(defmacro deftest
+  ```
+  Defines a test and registers it in the test suite
+
+  The `deftest` macro can be used to create named tests and anonymous tests. If
+  the first argument is a symbol, that argument is treated as the name of the
+  test. Otherwise, Testament uses `gensym` to generate a unique symbol to name
+  the test. If a test with the same name has already been defined, `deftest`
+  will raise an error.
+
+  A test is just a function. `args` (excluding the first argument if that
+  argument is a symbol) is used as the body of the function. Testament adds
+  respective calls to a setup function and a teardown function before and after
+  the forms in the body. The function can be called by itself and will use the
+  function set with `set-result-printer` to print the result of running the
+  test (the `default-print-result` function will be called if no function has
+  been set).
+
+  In addition to creating a function, `deftest` registers the test in the 'test
+  suite'. Testament's test suite is a global table of tests that have been
+  registered by `deftest`. When a user calls `run-tests!` without specifying any
+  tests to run, each test in the test suite is called. The order in which each
+  test is called is not guaranteed.
+
+  If `deftest` is called with no arguments or if the only argument is a symbol,
+  an arity error is raised.
+  ```
+  [& args]
+  (when (or (zero? (length args))
+            (and (one? (length args)) (= :symbol (type (first args)))))
+    (error "arity mismatch"))
+  (let [[name body] (if (= :symbol (type (first args)))
+                      [(first args) (slice args 1)]
+                      [(symbol "test" (gensym)) args])
+        nameg (gensym)
+        namek (keyword name)]
+    ~(def ,name
+       (do
+         (def ,nameg (fn ,namek []
+                          (,setup-test ',name)
+                          ,;body
+                          (,teardown-test ',name)))
+         (,register-test ',name ,nameg)
+         (fn ,namek [&named silent? exit?]
+           (,nameg)
+           (unless silent?
+             (,print-result))
+           (,reset-tests!)
+           nil)))))
+
+
+### Test suite functions
 
 (defn run-tests!
   ```
@@ -639,14 +709,12 @@
         (test))
       # otherwise always run test
       (test)))
+  # print reports
   (unless silent?
-    (when (nil? print-reports)
-      (set-report-printer default-print-reports))
     (print-reports num-tests-run num-asserts num-tests-passed))
-
+  # report values
   (def in-repl? (dyn :testament-repl?))
   (def report-values (values reports))
-
   (when (and exit?
              (not (= num-tests-run num-tests-passed))
              (not in-repl?))
