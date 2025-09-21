@@ -1,7 +1,7 @@
 # testament API
 
 
-[==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [exercise!](#exercise), [is](#is), [reset-all!](#reset-all), [reset-tests!](#reset-tests), [review](#review), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer), [set-result-printer](#set-result-printer)
+[==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [exercise!](#exercise), [is](#is), [reset-all!](#reset-all), [reset-tests!](#reset-tests), [review](#review), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer), [set-results-printer](#set-results-printer)
 
 ## ==
 
@@ -383,17 +383,19 @@ to `true`.
 
 [17]: lib/testament.janet#L80
 
-## set-result-printer
+## set-results-printer
 
 **function**  | [source][18]
 
 ```janet
-(set-result-printer f)
+(set-results-printer f)
 ```
 
-Sets the function to print after calling a test function
+Sets the function to print test results
 
-The function `f` will be applied with no arguments.
+The function `f` will be applied with the following one argument:
+
+1. test reports (as a table).
 
 A default printer function is used if no function has been set.
 
