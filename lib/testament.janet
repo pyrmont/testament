@@ -19,7 +19,7 @@
 (var- tests @{})
 (var- reports @{})
 (var- print-reports-fn nil)
-(var- print-result-fn nil)
+(var- print-results-fn nil)
 (var- on-result-hook default-result-hook)
 
 
@@ -97,17 +97,19 @@
     (error "argument not of type :function")))
 
 
-(defn set-result-printer
+(defn set-results-printer
   ```
-  Sets the function to print after calling a test function
+  Sets the function to print test results
 
-  The function `f` will be applied with no arguments.
+  The function `f` will be applied with the following one argument:
+
+  1. test reports (as a table).
 
   A default printer function is used if no function has been set.
   ```
   [f]
   (if (= :function (type f))
-    (set print-result-fn f)
+    (set print-results-fn f)
     (error "argument not of type :function")))
 
 
@@ -136,8 +138,8 @@
     "Reason: Result is Boolean false"))
 
 
-(defn- default-print-result
-  []
+(defn- default-print-results
+  [reports]
   (each report reports
     (unless (empty? (report :failures))
       (do
@@ -147,19 +149,18 @@
           (print (failure-message failure)))))))
 
 
-(defn- print-result
+(defn- print-results
   ```
-  Prints result
+  Prints results
   ```
   []
-  (if (nil? print-result-fn)
-    (default-print-result)
-    (print-result-fn)))
+  (def printer (or print-results-fn default-print-results))
+  (printer reports))
 
 
 (defn- default-print-reports
   [num-tests-run num-asserts num-tests-passed]
-  (print-result)
+  (print-results)
   (let [stats (string num-tests-run " tests run containing "
                       num-asserts " assertions\n"
                       num-tests-passed " tests passed, "
@@ -175,10 +176,9 @@
   ```
   Prints reports
   ```
-  [num-tests-run num-asserts num-tests-passed]
-  (if (nil? print-reports-fn)
-    (default-print-reports num-tests-run num-asserts num-tests-passed)
-    (print-reports-fn num-tests-run num-asserts num-tests-passed)))
+  []
+  (def printer (or print-reports-fn default-print-reports))
+  (printer num-tests-run num-asserts num-tests-passed))
 
 
 ### Recording functions
@@ -610,7 +610,7 @@
   []
   (reset-tests!)
   (set print-reports-fn nil)
-  (set print-result-fn nil)
+  (set print-results-fn nil)
   (set on-result-hook default-result-hook)
   nil)
 
@@ -665,7 +665,7 @@
          (fn ,namek [&named silent? exit?]
            (,nameg)
            (unless silent?
-             (,print-result))
+             (,print-results))
            (,reset-tests!)
            nil)))))
 
@@ -713,7 +713,7 @@
       (test)))
   # print reports
   (unless silent?
-    (print-reports num-tests-run num-asserts num-tests-passed))
+    (print-reports))
   # report values
   (def in-repl? (dyn :testament-repl?))
   (def report-values (values reports))
