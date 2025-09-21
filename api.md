@@ -1,4 +1,4 @@
-# Testament API
+# testament API
 
 
 [==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [exercise!](#exercise), [is](#is), [reset-tests!](#reset-tests), [review](#review), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer)
@@ -11,7 +11,7 @@
 (== x y)
 ```
 
-Return true if the arguments are equivalent
+Returns true if the arguments are equivalent
 
 The arguments are considered equivalent for the purposes of this function if
 they are of equivalent types and have the same structure. Types are equivalent
@@ -31,7 +31,7 @@ function.
 (assert-deep-equal expect actual &opt note)
 ```
 
-Assert that `expect` is deeply equal to `actual` (with an optional `note`)
+Asserts that `expect` is deeply equal to `actual` (with an optional `note`)
 
 The `assert-deep-equal` macro provides a mechanism for creating an assertion
 that an expected result is deeply equal to the actual result. The forms of
@@ -51,7 +51,7 @@ identify the assertion. If no `note` is provided, the form
 (assert-equal expect actual &opt note)
 ```
 
-Assert that `expect` is equal to `actual` (with an optional `note`)
+Asserts that `expect` is equal to `actual` (with an optional `note`)
 
 The `assert-equal` macro provides a mechanism for creating an assertion that
 an expected result is equal to the actual result. The forms of `expect` and
@@ -71,7 +71,7 @@ is used.
 (assert-equivalent expect actual &opt note)
 ```
 
-Assert that `expect` is equivalent to `actual` (with an optional `note`)
+Asserts that `expect` is equivalent to `actual` (with an optional `note`)
 
 The `assert-equivalent` macro provides a mechanism for creating an assertion
 that an expected result is equivalent to the actual result. Testament
@@ -94,7 +94,7 @@ is used.
 (assert-expr expr &opt note)
 ```
 
-Assert that the expression, `expr`, is true (with an optional `note`)
+Asserts that the expression, `expr`, is true (with an optional `note`)
 
 The `assert-expr` macro provides a mechanism for creating a generic assertion.
 
@@ -111,7 +111,7 @@ identify the assertion. If no `note` is provided, the form of `expr` is used.
 (assert-matches structure actual &opt note)
 ```
 
-Assert that `structure` matches `actual` (with an optional `note`)
+Asserts that `structure` matches `actual` (with an optional `note`)
 
 The `assert-matches` macro provides a mechanism for creating an assertion that
 an expression matches a particular structure (at least in part).
@@ -130,7 +130,7 @@ identify the assertion. If no `note` is provided, the form
 (assert-thrown expr &opt note)
 ```
 
-Assert that an expression, `expr`, throws an error (with an optional `note`)
+Asserts that an expression, `expr`, throws an error (with an optional `note`)
 
 The `assert-thrown` macro provides a mechanism for creating an assertion that
 an expression throws an error.
@@ -149,7 +149,7 @@ used.
 (assert-thrown-message expect expr &opt note)
 ```
 
-Assert that the expression, `expr`, throws an error with the message `expect`
+Asserts that the expression, `expr`, throws an error with the message `expect`
 (with an optional `note`)
 
 The `assert-thrown` macro provides a mechanism for creating an assertion that
@@ -169,7 +169,7 @@ identify the assertion. If no `note` is provided, the form
 (deftest & args)
 ```
 
-Define a test and register it in the test suite
+Defines a test and registers it in the test suite
 
 The `deftest` macro can be used to create named tests and anonymous tests. If
 the first argument is a symbol, that argument is treated as the name of the
@@ -184,9 +184,9 @@ the forms in the body.
 
 In addition to creating a function, `deftest` registers the test in the 'test
 suite'. Testament's test suite is a global table of tests that have been
-registered by `deftest`. When a user calls `run-tests!`, each test in the
-test suite is called. The order in which each test is called is not
-guaranteed.
+registered by `deftest`. When a user calls `run-tests!` without specifying any
+tests to run, each test in the test suite is called. The order in which each
+test is called is not guaranteed.
 
 If `deftest` is called with no arguments or if the only argument is a symbol,
 an arity error is raised.
@@ -201,7 +201,7 @@ an arity error is raised.
 (exercise! args & body)
 ```
 
-Define, run and reset the tests provided in the macro body
+Defines, runs and resets the tests provided in the macro body
 
 This macro will run the forms in `body`, call `run-test!`, call `reset-tests!`
 and then return the value of `run-tests!`.
@@ -213,7 +213,7 @@ tuple.
 Please note that, like `run-tests!`, `exercise!` calls `os/exit` when there
 are failing tests unless the argument `:exit-on-fail` is set to `false`.
 
-[10]: lib/testament.janet#L649
+[10]: lib/testament.janet#L660
 
 ## is
 
@@ -223,7 +223,7 @@ are failing tests unless the argument `:exit-on-fail` is set to `false`.
 (is assertion &opt note)
 ```
 
-Assert that an `assertion` is true (with an optional `note`)
+Asserts that an `assertion` is true (with an optional `note`)
 
 The `is` macro provides a succinct mechanism for creating assertions.
 Testament includes support for seven types of assertions:
@@ -257,7 +257,7 @@ identify the assertion.
 (reset-tests!)
 ```
 
-Reset all reporting variables
+Resets all reporting variables
 
 [12]: lib/testament.janet#L588
 
@@ -269,14 +269,14 @@ Reset all reporting variables
 (review path & args)
 ```
 
-Import all bindings as public in the specified module
+Imports all bindings as public in the specified module
 
 This macro performs similarly to `import`. The difference is that it sets all
 the bindings as public. This is intended for situations where it is not
 desirable to make bindings public but the user would still like to be able to
 subject the bindings to testing.
 
-[13]: lib/testament.janet#L695
+[13]: lib/testament.janet#L706
 
 ## run-tests!
 
@@ -286,10 +286,11 @@ subject the bindings to testing.
 (run-tests! &keys {:silent silent? :exit-on-fail exit?})
 ```
 
-Run the registered tests
+Runs the tests specified or alternatively the registered tests
 
-This function will run the tests registered in the test suite via `deftest`.
-It accepts two optional arguments:
+This function will run the tests specified or alternatively the tests
+registered in the test suite via `deftest`. It accepts two optional
+arguments:
 
 1. `:silent` whether to omit the printing of reports (default: `false`); and
 2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
@@ -319,7 +320,7 @@ with the most up-to-date code.
 (set-on-result-hook f)
 ```
 
-Set the `on-result-hook`
+Sets the `on-result-hook`
 
 The function `f` will be invoked when a result becomes available. The
 function is called with a single argument, the `result`. The `result` is a
@@ -351,7 +352,7 @@ The 'value' of the assertion depends on the kind of assertion:
 (set-report-printer f)
 ```
 
-Set the `print-reports` function
+Sets the `print-reports` function
 
 The function `f` will be applied with the following three arguments:
 
