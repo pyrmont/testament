@@ -633,7 +633,7 @@
   the forms in the body.
 
   The function can be called by itself and will use the function set with
-  `set-result-printer` to print the result of running the test if there is a
+  `set-results-printer` to print the result of running the test if there is a
   failure (a default printing function will be called if no function has been
   set). If the test is successful, no result is printed.
 
