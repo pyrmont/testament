@@ -99,7 +99,7 @@
 
 (defn set-result-printer
   ```
-  Sets the function to print after calling a `deftest`-defined function
+  Sets the function to print after calling a test function
 
   The function `f` will be applied with no arguments.
 
@@ -630,10 +630,12 @@
   A test is just a function. `args` (excluding the first argument if that
   argument is a symbol) is used as the body of the function. Testament adds
   respective calls to a setup function and a teardown function before and after
-  the forms in the body. The function can be called by itself and will use the
-  function set with `set-result-printer` to print the result of running the
-  test (the `default-print-result` function will be called if no function has
-  been set).
+  the forms in the body.
+
+  The function can be called by itself and will use the function set with
+  `set-result-printer` to print the result of running the test if there is a
+  failure (a default printing function will be called if no function has been
+  set). If the test is successful, no result is printed.
 
   In addition to creating a function, `deftest` registers the test in the 'test
   suite'. Testament's test suite is a global table of tests that have been
