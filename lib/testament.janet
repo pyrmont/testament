@@ -113,6 +113,35 @@
     (error "argument not of type :function")))
 
 
+(defn- colour
+  [c text]
+  (def colours {:green "\e[32m" :red "\e[31m"})
+  (if (dyn :test/color?)
+    (string (get colours c "\e[0m") text "\e[0m")
+    text))
+
+
+(defn- ruler
+  ```
+  Prints a dashed line as long as the longest line
+  ```
+  [lines &opt sym]
+  (default sym "=")
+  (def len (->> (string/split "\n" lines)
+                (map length)
+                (splice)
+                (max)))
+  (print (string/repeat sym len)))
+
+
+(defn- stats
+  []
+  (string num-tests-run " tests run containing "
+          num-asserts " assertions\n"
+          num-tests-passed " tests passed, "
+          (- num-tests-run num-tests-passed) " tests failed"))
+
+
 (defn- failure-message
   ```
   Returns the appropriate failure message for the given result
@@ -140,13 +169,14 @@
 
 (defn- default-print-results
   [reports]
+  (def s (stats))
   (each report reports
     (unless (empty? (report :failures))
-      (do
-        (print "> Failed: " (report :test))
-        (each failure (report :failures)
-          (print "Assertion: " (failure :note))
-          (print (failure-message failure)))))))
+      (ruler s "-")
+      (print "> " (colour :red "Failed") ": " (report :test))
+      (each failure (report :failures)
+        (print "Assertion: " (failure :note))
+        (print (failure-message failure))))))
 
 
 (defn- print-results
@@ -160,16 +190,11 @@
 
 (defn- default-print-reports
   [num-tests-run num-asserts num-tests-passed]
+  (def s (stats))
   (print-results)
-  (let [stats (string num-tests-run " tests run containing "
-                      num-asserts " assertions\n"
-                      num-tests-passed " tests passed, "
-                      (- num-tests-run num-tests-passed) " tests failed")
-        len   (->> (string/split "\n" stats) (map length) (splice) (max))]
-    (print)
-    (print (string/repeat "-" len))
-    (print stats)
-    (print (string/repeat "-" len))))
+  (ruler s)
+  (print s)
+  (ruler s))
 
 
 (defn- print-reports
@@ -625,7 +650,7 @@
   the first argument is a symbol, that argument is treated as the name of the
   test. Otherwise, Testament uses `gensym` to generate a unique symbol to name
   the test. If a test with the same name has already been defined, `deftest`
-  will raise an error.
+  will print a warning.
 
   A test is just a function. `args` (excluding the first argument if that
   argument is a symbol) is used as the body of the function. Testament adds
@@ -637,8 +662,8 @@
   failure (a default printing function will be called if no function has been
   set). If the test is successful, no result is printed.
 
-  In addition to creating a function, `deftest` registers the test in the 'test
-  suite'. Testament's test suite is a global table of tests that have been
+  In addition to creating a function, `deftest` registers the test in the _test
+  suite_. Testament's test suite is a global table of tests that have been
   registered by `deftest`. When a user calls `run-tests!` without specifying any
   tests to run, each test in the test suite is called. The order in which each
   test is called is not guaranteed.
@@ -662,7 +687,7 @@
                           ,;body
                           (,teardown-test ',name)))
          (,register-test ',name ,nameg)
-         (fn ,namek [&named silent? exit?]
+         (fn ,namek [&named silent?]
            (,nameg)
            (unless silent?
              (,print-results))
@@ -674,40 +699,47 @@
 
 (defn run-tests!
   ```
-  Runs the tests specified or alternatively the registered tests
+  Runs the registered tests
 
-  This function will run the tests specified or alternatively the tests
-  registered in the test suite via `deftest`. It accepts two optional
-  arguments:
+  This function will run the tests registered in the test suite via `deftest`.
+  It accepts two optional arguments:
 
-  1. `:silent` whether to omit the printing of reports (default: `false`); and
-  2. `:exit-on-fail` whether to exit if any of the tests fail (default: `true`).
+  1. `:silent?` whether to omit the printing of reports (default: `false`); and
+  2. `:no-exit?` whether to exit if any of the tests fail (default: `false`).
 
-  Please note that `run-tests!` calls `os/exit` when there are failing tests
-  unless the argument `:exit-on-fail` is set to `false` or the
-  `:testament-repl?` dynamic variable is set to `true`.
+  The `run-tests!` function will print the reports unless called with
+  `:silent?`. The default report printing function will colourize the output if
+  the `:test/colour?` dynamic binding is set to `true`.
 
-  In all other cases, the function returns an indexed collection of test
-  reports. Each report in the collection is a dictionary collection containing
-  three keys: `:test`, `:passes` and `:failures`. `:test` is the name of the
-  test while `:passes` and `:failures` contain the results of each respective
-  passed and failed assertion. Each result is a data structure of the kind
-  described in the docstring for `set-on-result-hook`.
+  The `run-tests!` function calls `os/exit` when there are failing tests unless
+  the argument `:no-exit?` is set to `false` or the `:testament/repl?` dynamic
+  binding is set to `true`.
 
-  When the dynamic variable `:testament-repl?` is set to `true`, this will
-  also reset the test reports and empty the module/cache to provide a fresh run
-  with the most up-to-date code.
+  If `:no-exit?` is set to `true`, the `run-tests!` function returns an indexed
+  collection of test reports. Each report in the collection is a dictionary
+  collection containing three keys: `:test`, `:passes` and `:failures`. `:test`
+  is the name of the test while `:passes` and `:failures` contain the results
+  of each respective passed and failed assertion. Each result is a data
+  structure of the kind described in the docstring for `set-on-result-hook`.
+
+  A user can specify tests to run or skip using the `:test/tests` and
+  `:test/skips` dynamic bindings. Each should be an array/tuple that contains
+  symbols matching the names of the tests to run or skip.
+
+  Finally, if the dynamic binding `:testament/repl?` is set to `true`, this
+  will also reset the test reports and empty the module/cache to provide a
+  fresh run with the most up-to-date code.
   ```
-  [&keys {:silent silent? :exit-on-fail exit?}]
+  [&named no-exit? silent?]
   (each [name test] (pairs tests)
     (cond
       # if specific tests to run, run test if specified
-      (dyn :tests)
-      (when (has-value? (dyn :tests) name)
+      (dyn :test/tests)
+      (when (has-value? (dyn :test/tests) name)
         (test))
       # if specific tests to skip, run test unless specified
-      (dyn :skips)
-      (unless (has-value? (dyn :tests) name)
+      (dyn :test/skips)
+      (unless (has-value? (dyn :test/skips) name)
         (test))
       # otherwise always run test
       (test)))
@@ -715,11 +747,12 @@
   (unless silent?
     (print-reports))
   # report values
-  (def in-repl? (dyn :testament-repl?))
+  (def in-repl? (or (dyn :testament/repl?)
+                    (dyn :testament-repl?)))
   (def report-values (values reports))
-  (when (and exit?
-             (not (= num-tests-run num-tests-passed))
-             (not in-repl?))
+  (when (and (not no-exit?)
+             (not in-repl?)
+             (not (= num-tests-run num-tests-passed)))
     (os/exit 1))
   (when in-repl?
     (reset-tests!)
@@ -739,15 +772,15 @@
   tuple.
 
   Please note that, like `run-tests!`, `exercise!` calls `os/exit` when there
-  are failing tests unless the argument `:exit-on-fail` is set to `false`.
+  are failing tests unless the argument `:no-exit?` is set to `true`.
   ```
   [args & body]
-  (let [exit-code (gensym)]
+  (let [ret-val (gensym)]
     ~(do
        ,;body
-       (def ,exit-code (,run-tests! ,;args))
+       (def ,ret-val (,run-tests! ,;args))
        (,reset-tests!)
-       ,exit-code)))
+       ,ret-val)))
 
 
 # Review macro

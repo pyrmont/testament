@@ -1,5 +1,6 @@
 (import ../lib/testament :as t :exit true)
 
+(setdyn :test/color? false)
 
 (defn test-== []
   (def x [@[{:a 1}]])
@@ -217,7 +218,7 @@
                                 :expect  1
                                 :actual  1
                                 :note    "(= 1 1)"}]}]
-        actual (t/run-tests! :silent true)]
+        actual (t/run-tests! :silent? true :no-exit? true)]
     (unless (deep= expect actual)
       (error "Test failed"))))
 
@@ -236,7 +237,7 @@
                                 :expect  1
                                 :actual  2
                                 :note    "(= 1 2)"}]}]
-        actual (t/run-tests! :silent true :exit-on-fail false)]
+        actual (t/run-tests! :silent? true :no-exit? true)]
     (unless (deep= expect actual)
       (error "Test failed"))))
 
@@ -250,10 +251,10 @@
   (let [output @""
         stats  "1 tests run containing 1 assertions\n1 tests passed, 0 tests failed"
         len    (->> (string/split "\n" stats) (map length) splice max)
-        rule   (string/repeat "-" len)]
+        rule   (string/repeat "=" len)]
     (with-dyns [:out output]
-      (t/run-tests!))
-    (unless (= (string "\n" rule "\n" stats "\n" rule "\n") (string output))
+      (t/run-tests! :silent? false :no-exit? true))
+    (unless (= (string rule "\n" stats "\n" rule "\n") (string output))
       (error "Test failed"))))
 
 (test-reporting)
@@ -267,7 +268,7 @@
   (t/deftest test-name (t/assert-equal 1 1))
   (let [output @""]
     (with-dyns [:out output]
-      (t/run-tests!))
+      (t/run-tests! :silent? false :no-exit? true))
     (unless (= (string "CUSTOM:1:1:1:" "\n") (string output))
       (error "Test failed"))))
 
@@ -290,7 +291,7 @@
   (t/deftest test-name (t/assert-equal 1 1 "1"))
   (let [output @""]
     (with-dyns [:out output]
-      (t/run-tests!))
+      (t/run-tests! :silent? false :no-exit? true))
     (unless called
       (error "Test failed. on-result-hook was not called."))))
 
@@ -303,7 +304,7 @@
   (t/deftest test-name (t/assert-equal 1 1))
   (let [output @""]
     (with-dyns [:out output]
-      (t/run-tests! :silent true))
+      (t/run-tests! :silent? true :no-exit? true))
     (unless (empty? (string output))
       (error "Test failed"))))
 
@@ -316,11 +317,11 @@
   (let [output @""
         stats  "1 tests run containing 1 assertions\n1 tests passed, 0 tests failed"
         len    (->> (string/split "\n" stats) (map length) splice max)
-        rule   (string/repeat "-" len)]
+        rule   (string/repeat "=" len)]
     (with-dyns [:out output]
-      (t/exercise! []
+      (t/exercise! [:silent? false :no-exit? true]
         (t/deftest test-name (t/assert-equal 1 1))))
-    (unless (= (string "\n" rule "\n" stats "\n" rule "\n") (string output))
+    (unless (= (string rule "\n" stats "\n" rule "\n") (string output))
       (error "Test failed"))))
 
 (test-exercise!)
@@ -331,7 +332,7 @@
 (defn test-exercise!-silent []
   (let [output @""]
     (with-dyns [:out output]
-      (t/exercise! [:silent true]
+      (t/exercise! [:silent? true :no-exit? true]
         (t/deftest test-name (t/assert-equal 1 1))))
     (unless (empty? (string output))
       (error "Test failed"))))
@@ -348,6 +349,7 @@
       (testname))
     (def expect
       ```
+      -----------------------------------
       > Failed: testname
       Assertion: (= 1 2)
       Expect (L): 1
@@ -362,7 +364,7 @@
 (t/reset-all!)
 
 (defn test-call-tests []
-  (setdyn :tests ['test-name1])
+  (setdyn :test/tests ['test-name1])
   (t/deftest test-name1 (t/assert-equal 1 1))
   (t/deftest test-name2 (t/assert-equal 1 1))
   (let [expect @[@{:test     'test-name1
@@ -373,7 +375,7 @@
                                 :expect  1
                                 :actual  1
                                 :note    "(= 1 1)"}]}]
-        actual (t/run-tests! :silent true)]
+        actual (t/run-tests! :silent? true :no-exit? true)]
     (unless (deep= expect actual)
       (error "Test failed"))))
 
@@ -383,7 +385,7 @@
 (t/reset-all!)
 
 (defn test-skip-tests []
-  (setdyn :skips ['test-name2])
+  (setdyn :test/skips ['test-name2])
   (t/deftest test-name1 (t/assert-equal 1 1))
   (t/deftest test-name2 (t/assert-equal 1 1))
   (let [expect @[@{:test     'test-name1
@@ -394,7 +396,7 @@
                                 :expect  1
                                 :actual  1
                                 :note    "(= 1 1)"}]}]
-        actual (t/run-tests! :silent true)]
+        actual (t/run-tests! :silent? true :no-exit? true)]
     (unless (deep= expect actual)
       (error "Test failed"))))
 
