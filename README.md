@@ -1,6 +1,9 @@
 # Testament
 
-[![Build Status](https://github.com/pyrmont/testament/workflows/build/badge.svg)](https://github.com/pyrmont/testament/actions?query=workflow%3Abuild)
+[![Test Status][icon]][status]
+
+[icon]: https://github.com/pyrmont/testament/workflows/test/badge.svg
+[status]: https://github.com/pyrmont/testament/actions?query=workflow%3Atest
 
 Testament is a testing library for Janet. It takes inspiration Clojure's [clojure.test][] library.
 
@@ -8,11 +11,10 @@ Testament is a testing library for Janet. It takes inspiration Clojure's [clojur
 
 ## Installation
 
-Add the dependency to your `project.janet` file:
+Add the dependency to your `info.jdn` file:
 
 ```janet
-(declare-project
-  :dependencies ["https://github.com/pyrmont/testament"])
+  :dependencies ["https://github.com/pyrmont/testament"]
 ```
 
 ## Usage
@@ -32,35 +34,45 @@ Testament can be used like this:
 (run-tests!)
 ```
 
-Put your tests in the `test/` directory within your project and then run:
+Put your tests in the `test/` directory within your project and then use a
+bundle manager like [Jeep][]:
 
 ```console
-$ jpm test
+$ jeep test -R
 ```
 
-If you do the above with a file saved to `test/example.janet`, you should see:
+[Jeep]: https://github.com/pyrmont/jeep "Visit the Jeep repository on GitHub"
+
+Or if you walk to school through the snow uphill both ways:
+
+```console
+$ for f in test/*.janet; do janet "$f" || { rc=$?; break; }; done; (exit ${rc:-0})
+```
+
+If you use Jeep, with a file saved to `test/example.janet`, you should see:
 
 ```text
 running test/example.janet ...
-
+-----------------------------------
 > Failed: two-plus-two
 Assertion: 2 + 2 = 5
 Expect (L): 5
 Actual (R): 4
-
------------------------------------
+===================================
 2 tests run containing 2 assertions
 1 tests passed, 1 tests failed
------------------------------------
+===================================
+1 of 1 scripts failed:
+  ./test/example.janet
 ```
 
 ### In REPLs
 
-To use Testament in a REPL, set the dynamic variable `:testament-repl?` to
+To use Testament in a REPL, set the dynamic variable `:testament/repl?` to
 `true`:
 
 ```janet
-(setdyn :testament-repl? true)
+(setdyn :testament/repl? true)
 ```
 
 This will (a) stop Testament from exiting your REPL if a test fails, (b) reset
