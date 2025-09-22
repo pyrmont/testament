@@ -1,0 +1,52 @@
+name: test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: "checkout project"
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: "find latest version of janet"
+      uses: oprypin/find-latest-tag@v1
+      with:
+        repository: janet-lang/janet
+        releases-only: true
+        prefix: 'v'
+      id: janet-ver
+    - name: "set prefix"
+      run: echo "PREFIX=$GITHUB_WORKSPACE/.janet" >> $GITHUB_ENV
+      shell: bash
+    - name: "set paths"
+      run: |
+        echo "$PREFIX/bin" >> $GITHUB_PATH
+        echo "JANET_HEADERPATH=$PREFIX/include" >> $GITHUB_ENV
+        echo "JANET_BINPATH=$PREFIX/bin" >> $GITHUB_ENV
+        echo "JANET_LIBPATH=$PREFIX/lib" >> $GITHUB_ENV
+        echo "JANET_MANPATH=$PREFIX/man" >> $GITHUB_ENV
+        echo "JANET_PATH=$PREFIX" >> $GITHUB_ENV
+      shell: bash
+    - name: "make directories"
+      run: mkdir -p $PREFIX
+      shell: bash
+    - name: "download janet"
+      run: curl -LO https://github.com/janet-lang/janet/releases/download/${{ steps.janet-ver.outputs.tag }}/janet-${{ steps.janet-ver.outputs.tag }}-linux-x64.tar.gz
+      shell: bash
+    - name: "extract janet"
+      run: tar -xzf janet-${{ steps.janet-ver.outputs.tag }}-linux-x64.tar.gz --strip-components=2 -C $PREFIX
+      shell: bash
+    - name: "return to workspace directory"
+      run: cd $GITHUB_WORKSPACE
+      shell: bash
+    - name: "run tests"
+      run: 'for f in test/*.janet; do janet "$f" || { rc=$?; break; }; done; (exit ${rc:-0})'
+      shell: bash
