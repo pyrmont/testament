@@ -52,7 +52,7 @@ $ for f in test/*.janet; do janet "$f" || { rc=$?; break; }; done; (exit ${rc:-0
 If you use Jeep, with a file saved to `test/example.janet`, you should see:
 
 ```text
-running test/example.janet ...
+running ./test/example.janet...
 -----------------------------------
 > Failed: two-plus-two
 Assertion: 2 + 2 = 5
