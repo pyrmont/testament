@@ -604,6 +604,18 @@
     ~(,assert-expr* ,assertion ',assertion ,note)))
 
 
+(defmacro each-is
+  ```
+  Asserts that each element in `assertions` is true (with an optional `note`)
+
+  This effectively calls `is` on each element in `assertions` using the optional note.
+  ```
+  [assertions &opt note]
+  ~(do
+     ,(seq [a :in assertions] (apply is [a note]))
+     nil))
+
+
 ### Test resets
 
 (defn- empty-module-cache! []

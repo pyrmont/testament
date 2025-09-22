@@ -1,7 +1,7 @@
 # testament API
 
 
-[==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [exercise!](#exercise), [is](#is), [reset-all!](#reset-all), [reset-tests!](#reset-tests), [review](#review), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer), [set-results-printer](#set-results-printer)
+[==](#), [assert-deep-equal](#assert-deep-equal), [assert-equal](#assert-equal), [assert-equivalent](#assert-equivalent), [assert-expr](#assert-expr), [assert-matches](#assert-matches), [assert-thrown](#assert-thrown), [assert-thrown-message](#assert-thrown-message), [deftest](#deftest), [each-is](#each-is), [exercise!](#exercise), [is](#is), [reset-all!](#reset-all), [reset-tests!](#reset-tests), [review](#review), [run-tests!](#run-tests), [set-on-result-hook](#set-on-result-hook), [set-report-printer](#set-report-printer), [set-results-printer](#set-results-printer)
 
 ## ==
 
@@ -196,11 +196,25 @@ test is called is not guaranteed.
 If `deftest` is called with no arguments or if the only argument is a symbol,
 an arity error is raised.
 
-[9]: lib/testament.janet#L645
+[9]: lib/testament.janet#L657
+
+## each-is
+
+**macro**  | [source][10]
+
+```janet
+(each-is assertions &opt note)
+```
+
+Asserts that each element in `assertions` is true (with an optional `note`)
+
+This effectively calls `is` on each element in `assertions` using the optional note.
+
+[10]: lib/testament.janet#L607
 
 ## exercise!
 
-**macro**  | [source][10]
+**macro**  | [source][11]
 
 ```janet
 (exercise! args & body)
@@ -218,11 +232,11 @@ tuple.
 Please note that, like `run-tests!`, `exercise!` calls `os/exit` when there
 are failing tests unless the argument `:no-exit?` is set to `true`.
 
-[10]: lib/testament.janet#L763
+[11]: lib/testament.janet#L775
 
 ## is
 
-**macro**  | [source][11]
+**macro**  | [source][12]
 
 ```janet
 (is assertion &opt note)
@@ -252,11 +266,11 @@ asserted expression.
 An optional `note` can be included that will be used in any failure result to
 identify the assertion.
 
-[11]: lib/testament.janet#L546
+[12]: lib/testament.janet#L546
 
 ## reset-all!
 
-**function**  | [source][12]
+**function**  | [source][13]
 
 ```janet
 (reset-all!)
@@ -264,11 +278,11 @@ identify the assertion.
 
 Resets all reporting variables and settings
 
-[12]: lib/testament.janet#L631
+[13]: lib/testament.janet#L643
 
 ## reset-tests!
 
-**function**  | [source][13]
+**function**  | [source][14]
 
 ```janet
 (reset-tests!)
@@ -276,11 +290,11 @@ Resets all reporting variables and settings
 
 Resets all reporting variables
 
-[13]: lib/testament.janet#L617
+[14]: lib/testament.janet#L629
 
 ## review
 
-**macro**  | [source][14]
+**macro**  | [source][15]
 
 ```janet
 (review path & args)
@@ -293,11 +307,11 @@ the bindings as public. This is intended for situations where it is not
 desirable to make bindings public but the user would still like to be able to
 subject the bindings to testing.
 
-[14]: lib/testament.janet#L809
+[15]: lib/testament.janet#L821
 
 ## run-tests!
 
-**function**  | [source][15]
+**function**  | [source][16]
 
 ```janet
 (run-tests! &named no-exit? silent?)
@@ -334,11 +348,11 @@ Finally, if the dynamic binding `:testament/repl?` is set to `true`, this
 will also reset the test reports and empty the module/cache to provide a
 fresh run with the most up-to-date code.
 
-[15]: lib/testament.janet#L700
+[16]: lib/testament.janet#L712
 
 ## set-on-result-hook
 
-**function**  | [source][16]
+**function**  | [source][17]
 
 ```janet
 (set-on-result-hook f)
@@ -366,11 +380,11 @@ The 'value' of the assertion depends on the kind of assertion:
 - `:thrown` either `true` or `false`; and
 - `:thrown-message` the error specified in the assertion.
 
-[16]: lib/testament.janet#L211
+[17]: lib/testament.janet#L211
 
 ## set-report-printer
 
-**function**  | [source][17]
+**function**  | [source][18]
 
 ```janet
 (set-report-printer f)
@@ -388,11 +402,11 @@ A default printer function is used if no function has been set. In all cases,
 the function will not be called if `run-tests!` is called with `:silent` set
 to `true`.
 
-[17]: lib/testament.janet#L80
+[18]: lib/testament.janet#L80
 
 ## set-results-printer
 
-**function**  | [source][18]
+**function**  | [source][19]
 
 ```janet
 (set-results-printer f)
@@ -406,5 +420,5 @@ The function `f` will be applied with the following one argument:
 
 A default printer function is used if no function has been set.
 
-[18]: lib/testament.janet#L100
+[19]: lib/testament.janet#L100
 

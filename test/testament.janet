@@ -208,6 +208,30 @@
 
 (t/reset-all!)
 
+(defn test-each-is-macro []
+  (t/deftest test-name (t/each-is [(= 1 1) (= 1 2)]))
+  (let [expect @[@{:test     'test-name
+                   :passes   @[{:test    'test-name
+                                :kind    :equal
+                                :passed? true
+                                :expect  1
+                                :actual  1
+                                :note    "(= 1 1)"}]
+                   :failures @[{:test    'test-name
+                                :kind    :equal
+                                :passed? false
+                                :expect  1
+                                :actual  2
+                                :note    "(= 1 2)"}]}]
+        actual (t/run-tests! :silent? true :no-exit? true)]
+    (unless (deep= expect actual)
+      (error "Test failed"))))
+
+(test-each-is-macro)
+
+
+(t/reset-all!)
+
 (defn test-exit-code-success []
   (t/deftest test-name (t/assert-equal 1 1))
   (let [expect @[@{:test     'test-name
