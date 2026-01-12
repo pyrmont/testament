@@ -6,5 +6,6 @@
  :url "https://github.com/pyrmont/testament"
  :repo "git+https://github.com/pyrmont/testament"
 
- :source {:prefix "testament"
-          :files ["lib" "init.janet"]}}
+ :artifacts {:libraries [{:prefix "testament"
+                          :paths ["lib"
+                                  "init.janet"]}]}}
