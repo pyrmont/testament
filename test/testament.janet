@@ -369,7 +369,7 @@
 (defn test-call-test []
   (t/deftest testname (t/assert-equal 1 2))
   (let [output @""]
-    (with-dyns [:out output]
+    (with-dyns [:out output :testament/diff? false]
       (testname))
     (def expect
       ```
@@ -425,3 +425,68 @@
       (error "Test failed"))))
 
 (test-skip-tests)
+
+
+(t/reset-all!)
+
+# Test diff functionality (integration tests)
+
+(defn test-diff-with-color []
+  (t/deftest test-with-diff
+    (t/assert-equal "hello" "hallo"))
+  (let [output @""]
+    (with-dyns [:out output :test/color? true]
+      (test-with-diff))
+    (def expect (string "-----------------------------------\n"
+                        "> \e[31mFailed\e[0m: test-with-diff\n"
+                        "Assertion: (= \"hello\" \"hallo\")\n"
+                        "Expect (L): \"h\e[48;5;52me\e[0mllo\"\n"
+                        "Actual (R): \"h\e[48;5;22ma\e[0mllo\"\n"))
+    (unless (= expect (string output))
+      (error "Test failed"))))
+
+(test-diff-with-color)
+
+
+(t/reset-all!)
+
+(defn test-diff-without-color []
+  (t/deftest test-no-color
+    (t/assert-equal "hello" "hallo"))
+  (let [output @""]
+    (with-dyns [:out output :test/color? false]
+      (test-no-color))
+    (def expect (string "-----------------------------------\n"
+                        "> Failed: test-no-color\n"
+                        "Assertion: (= \"hello\" \"hallo\")\n"
+                        "Expect (L): \"hello\"\n"
+                        "Actual (R): \"hallo\"\n"))
+    (unless (= expect (string output))
+      (error "Test failed"))))
+
+(test-diff-without-color)
+
+
+(t/reset-all!)
+
+(defn test-diff-long-string-fallback []
+  (def long-str1 (string/repeat "x" 1001))
+  (def long-str2 (string/repeat "y" 1001))
+  (t/deftest test-long-diff
+    (t/assert-equal long-str1 long-str2))
+  (let [output @""]
+    (with-dyns [:out output :test/color? true]
+      (test-long-diff))
+    (def expect
+      (string "-----------------------------------\n"
+              "> \e[31mFailed\e[0m: test-long-diff\n"
+              "Assertion: (= long-str1 long-str2)\n"
+              "Expect (L): " (string/format "%q" long-str1) "\n"
+              "Actual (R): " (string/format "%q" long-str2) "\n"))
+    (unless (= expect (string output))
+      (error "Test failed"))))
+
+(test-diff-long-string-fallback)
+
+
+(t/reset-all!)

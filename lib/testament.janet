@@ -121,6 +121,205 @@
     text))
 
 
+### Diff functions
+
+(defn- strip-common-prefix
+  ```
+  Returns [common-prefix s1-remainder s2-remainder]
+  ```
+  [s1 s2]
+  (def len (min (length s1) (length s2)))
+  (var i 0)
+  (while (and (< i len) (= (get s1 i) (get s2 i)))
+    (++ i))
+  [(string/slice s1 0 i) (string/slice s1 i) (string/slice s2 i)])
+
+
+(defn- strip-common-suffix
+  ```
+  Returns [s1-remainder s2-remainder common-suffix]
+  ```
+  [s1 s2]
+  (def len1 (length s1))
+  (def len2 (length s2))
+  (def len (min len1 len2))
+  (var i 0)
+  (while (and (< i len) (= (get s1 (- len1 1 i)) (get s2 (- len2 1 i))))
+    (++ i))
+  (if (zero? i)
+    [s1 s2 ""]
+    [(string/slice s1 0 (- len1 i))
+     (string/slice s2 0 (- len2 i))
+     (string/slice s1 (- len1 i))]))
+
+
+(defn- lcs-table
+  ```
+  Builds LCS table for two strings
+  ```
+  [s1 s2]
+  (def m (length s1))
+  (def n (length s2))
+  (def tbl (array/new-filled (+ m 1) nil))
+  (each i (range 0 (+ m 1))
+    (put tbl i (array/new-filled (+ n 1) 0)))
+  (each i (range 1 (+ m 1))
+    (each j (range 1 (+ n 1))
+      (if (= (get s1 (- i 1)) (get s2 (- j 1)))
+        (put (tbl i) j (+ (get-in tbl [(- i 1) (- j 1)]) 1))
+        (put (tbl i) j (max (get-in tbl [(- i 1) j])
+                            (get-in tbl [i (- j 1)]))))))
+  tbl)
+
+
+(defn- traceback-diff
+  ```
+  Traces back through LCS table to build diff segments
+  ```
+  [tbl s1 s2]
+  (def result @[])
+  (var i (length s1))
+  (var j (length s2))
+  (var stype nil)
+  (var buf @"")
+  (defn flush-segment []
+    (when stype
+      (array/push result @{:type stype
+                           :text (string/reverse buf)})
+      (set buf @"")))
+  (while (or (> i 0) (> j 0))
+    (cond
+      # characters match: record as equal
+      (and (> i 0) (> j 0) (= (get s1 (- i 1)) (get s2 (- j 1))))
+      (do
+        (unless (= :equal stype)
+          (flush-segment)
+          (set stype :equal))
+        (buffer/push-byte buf (get s1 (- i 1)))
+        (-- i)
+        (-- j))
+      # characters only in s2: record as insertion
+      (and (> j 0) (or (zero? i) (>= (get-in tbl [i (- j 1)])
+                                     (get-in tbl [(- i 1) j]))))
+      (do
+        (unless (= :insert stype)
+          (flush-segment)
+          (set stype :insert))
+        (buffer/push-byte buf (get s2 (- j 1)))
+        (-- j))
+      # characters only in s1: record as deletion
+      (do
+        (unless (= stype :delete)
+          (flush-segment)
+          (set stype :delete))
+        (buffer/push-byte buf (get s1 (- i 1)))
+        (-- i))))
+  (flush-segment)
+  (reverse result))
+
+
+(defn- merge-small-changes
+  ```
+  Merges small changes for readability
+  ```
+  [segments]
+  (var i 2)
+  (while (def nxt (get segments i))
+    (def prv (get segments (- i 2)))
+    (def cur (get segments (- i 1)))
+    (cond
+      # case 1: skip
+      (or (= :equal (prv :type))
+          (= :equal (nxt :type))
+          (not= :equal (cur :type))
+          (string/has-prefix? " " (cur :text))
+          (string/has-suffix? " " (cur :text)))
+      (set i (+ i 1))
+      # case 2: prv and nxt different types
+      (not= (prv :type) (nxt :type))
+      (do
+        (put prv :text (string (prv :text) (cur :text)))
+        (put nxt :text (string (cur :text) (nxt :text)))
+        (array/remove segments (- i 1))
+        (set i (+ i 1)))
+      # case 3: prv and nxt same types
+      (def nxt-nxt (get segments (+ i 1)))
+      (do
+        (put nxt :text (string (cur :text) (nxt :text)))
+        (put nxt-nxt :text (string (cur :text) (nxt-nxt :text)))
+        (array/remove segments (- i 1))
+        (set i (+ i 2)))))
+  (set i 1)
+  (while (def nxt (get segments i))
+    (def cur (get segments (- i 1)))
+    (if (= (cur :type) (nxt :type))
+      (do
+        (put cur :text (string (cur :text) (nxt :text)))
+        (array/remove segments i))
+      (++ i)))
+  segments)
+
+
+(defn- compute-diff
+  ```
+  Computes byte-level diff between two strings with prefix/suffix optimization
+  ```
+  [s1 s2]
+  (def [prefix s1-mid s2-mid] (strip-common-prefix s1 s2))
+  (def [s1-core s2-core suffix] (strip-common-suffix s1-mid s2-mid))
+
+  (def diff-core
+    (if (and (empty? s1-core) (empty? s2-core))
+      @[]
+      (let [tbl (lcs-table s1-core s2-core)]
+        (traceback-diff tbl s1-core s2-core))))
+
+  (def result @[])
+  (unless (empty? prefix)
+    (array/push result {:type :equal :text prefix}))
+  (each segment diff-core
+    (array/push result segment))
+  (unless (empty? suffix)
+    (array/push result {:type :equal :text suffix}))
+
+  (merge-small-changes result))
+
+
+(defn- render-diff-line
+  ```
+  Renders a single line from diff data, showing either deletes or inserts
+  ```
+  [diff-data show-type]
+  (def parts @[])
+  (each segment diff-data
+    (case (segment :type)
+      :equal
+      (array/push parts (segment :text))
+
+      :delete
+      (when (= show-type :delete)
+        (array/push parts
+          (string "\e[48;5;52m" (segment :text) "\e[0m")))
+
+      :insert
+      (when (= show-type :insert)
+        (array/push parts
+          (string "\e[48;5;22m" (segment :text) "\e[0m")))))
+  (string/join parts))
+
+
+(defn- format-with-diff
+  ```
+  Formats expect/actual with diff highlighting
+  ```
+  [expect-str actual-str]
+  (def diff (compute-diff expect-str actual-str))
+  (def expect-line (render-diff-line diff :delete))
+  (def actual-line (render-diff-line diff :insert))
+  (string "Expect (L): " expect-line "\n"
+          "Actual (R): " actual-line))
+
+
 (defn- ruler
   ```
   Prints a dashed line as long as the longest line
@@ -149,8 +348,13 @@
   [result]
   (case (result :kind)
     :equal
-    (string "Expect (L): " (string/format "%q" (result :expect)) "\n"
-            "Actual (R): " (string/format "%q" (result :actual)))
+    (let [expect-str (string/format "%q" (result :expect))
+          actual-str (string/format "%q" (result :actual))]
+      (if (and (dyn :test/color?)
+               (< (+ (length expect-str) (length actual-str)) 2000))
+        (format-with-diff expect-str actual-str)
+        (string "Expect (L): " expect-str "\n"
+                "Actual (R): " actual-str)))
 
     :matches
     (string "Expect (L): Structure " (string/format "%q" (result :expect)) "\n"
