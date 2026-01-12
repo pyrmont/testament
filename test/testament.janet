@@ -429,7 +429,7 @@
 
 (t/reset-all!)
 
-# Test diff functionality (integration tests)
+# Test diff functionality
 
 (defn test-diff-with-color []
   (t/deftest test-with-diff
@@ -469,7 +469,7 @@
 
 (t/reset-all!)
 
-(defn test-diff-long-string-fallback []
+(defn test-diff-long-string []
   (def long-str1 (string/repeat "x" 1001))
   (def long-str2 (string/repeat "y" 1001))
   (t/deftest test-long-diff
@@ -481,12 +481,88 @@
       (string "-----------------------------------\n"
               "> \e[31mFailed\e[0m: test-long-diff\n"
               "Assertion: (= long-str1 long-str2)\n"
-              "Expect (L): " (string/format "%q" long-str1) "\n"
-              "Actual (R): " (string/format "%q" long-str2) "\n"))
+              "Expect (L): \"\e[48;5;52m" long-str1 "\e[0m\"\n"
+              "Actual (R): \"\e[48;5;22m" long-str2 "\e[0m\"\n"))
     (unless (= expect (string output))
       (error "Test failed"))))
 
-(test-diff-long-string-fallback)
+(test-diff-long-string)
+
+
+(t/reset-all!)
+
+(defn test-diff-multi-char []
+  (t/deftest test-multi-diff
+    (t/assert-equal "The quick brown fox" "The quirk brawn fox"))
+  (let [output @""]
+    (with-dyns [:out output :test/color? true]
+      (test-multi-diff))
+    (def expect (string "-----------------------------------\n"
+                        "> \e[31mFailed\e[0m: test-multi-diff\n"
+                        "Assertion: (= \"The quick brown fox\" \"The quirk brawn fox\")\n"
+                        "Expect (L): \"The qui\e[48;5;52mc\e[0mk br\e[48;5;52mo\e[0mwn fox\"\n"
+                        "Actual (R): \"The qui\e[48;5;22mr\e[0mk br\e[48;5;22ma\e[0mwn fox\"\n"))
+    (unless (= expect (string output))
+      (error "Test failed"))))
+
+(test-diff-multi-char)
+
+
+(t/reset-all!)
+
+(defn test-diff-prefix-suffix []
+  (t/deftest test-prefix-suffix
+    (t/assert-equal "xxxxxxxxAyyyyyyyy" "xxxxxxxxByyyyyyyy"))
+  (let [output @""]
+    (with-dyns [:out output :test/color? true]
+      (test-prefix-suffix))
+    (def expect (string "-----------------------------------\n"
+                        "> \e[31mFailed\e[0m: test-prefix-suffix\n"
+                        "Assertion: (= \"xxxxxxxxAyyyyyyyy\" \"xxxxxxxxByyyyyyyy\")\n"
+                        "Expect (L): \"xxxxxxxx\e[48;5;52mA\e[0myyyyyyyy\"\n"
+                        "Actual (R): \"xxxxxxxx\e[48;5;22mB\e[0myyyyyyyy\"\n"))
+    (unless (= expect (string output))
+      (error "Test failed"))))
+
+(test-diff-prefix-suffix)
+
+
+(t/reset-all!)
+
+(defn test-diff-multiple-changes []
+  (t/deftest test-multiple
+    (t/assert-equal "Julia is great" "Janet is awesome"))
+  (let [output @""]
+    (with-dyns [:out output :test/color? true]
+      (test-multiple))
+    (def expect (string "-----------------------------------\n"
+                        "> \e[31mFailed\e[0m: test-multiple\n"
+                        "Assertion: (= \"Julia is great\" \"Janet is awesome\")\n"
+                        "Expect (L): \"J\e[48;5;52mulia\e[0m is \e[48;5;52mgreat\e[0m\"\n"
+                        "Actual (R): \"J\e[48;5;22manet\e[0m is \e[48;5;22mawesome\e[0m\"\n"))
+    (unless (= expect (string output))
+      (error "Test failed"))))
+
+(test-diff-multiple-changes)
+
+
+(t/reset-all!)
+
+(defn test-diff-structures []
+  (t/deftest test-structures
+    (t/assert-equal [1 2 3] [1 3 3]))
+  (let [output @""]
+    (with-dyns [:out output :test/color? true]
+      (test-structures))
+    (def expect (string "-----------------------------------\n"
+                        "> \e[31mFailed\e[0m: test-structures\n"
+                        "Assertion: (= [1 2 3] [1 3 3])\n"
+                        "Expect (L): (1 \e[48;5;52m2\e[0m 3)\n"
+                        "Actual (R): (1 \e[48;5;22m3\e[0m 3)\n"))
+    (unless (= expect (string output))
+      (error "Test failed"))))
+
+(test-diff-structures)
 
 
 (t/reset-all!)
