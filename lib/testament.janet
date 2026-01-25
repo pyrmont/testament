@@ -192,12 +192,26 @@
         (array/remove segments (- i 1))
         (set i (+ i 1)))
       # case 3: prv and nxt same types
-      (def nxt-nxt (get segments (+ i 1)))
-      (do
-        (put nxt :text (string (cur :text) (nxt :text)))
-        (put nxt-nxt :text (string (cur :text) (nxt-nxt :text)))
-        (array/remove segments (- i 1))
-        (set i (+ i 2)))))
+      # Check if there's a non-equal segment after nxt with different type
+      (if (def nxt-nxt (get segments (+ i 1)))
+        (if (and (not= :equal (nxt-nxt :type))
+                 (not= (nxt :type) (nxt-nxt :type)))
+          # case 3a: nxt-nxt is non-equal and different type - duplicate cur
+          (do
+            (put nxt :text (string (cur :text) (nxt :text)))
+            (put nxt-nxt :text (string (cur :text) (nxt-nxt :text)))
+            (array/remove segments (- i 1))  # remove cur
+            (set i (+ i 1)))
+          # case 3b: nxt-nxt is equal or same type - merge prv, cur, nxt
+          (do
+            (put prv :text (string (prv :text) (cur :text) (nxt :text)))
+            (array/remove segments (- i 1))   # remove cur
+            (array/remove segments (- i 1)))) # remove nxt
+        # case 3c: no nxt-nxt - merge all three into prv
+        (do
+          (put prv :text (string (prv :text) (cur :text) (nxt :text)))
+          (array/remove segments (- i 1))     # remove cur
+          (array/remove segments (- i 1)))))) # remove nxt
   (merge-consecutives segments))
 
 
@@ -307,10 +321,10 @@
   # glue back together
   (def result @[])
   (unless (empty? prefix)
-    (array/push result {:type :equal :text prefix}))
+    (array/push result @{:type :equal :text prefix}))
   (array/concat result diff-core)
   (unless (empty? suffix)
-    (array/push result {:type :equal :text suffix}))
+    (array/push result @{:type :equal :text suffix}))
   # merge small, isolated equal segments
   (merge-islands result))
 

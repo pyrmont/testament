@@ -566,3 +566,50 @@
 
 
 (t/reset-all!)
+
+(defn test-diff-merge-islands []
+  # Test that small coincidental equal segments are properly merged
+  # to avoid confusing diff output
+  (t/deftest test-merge
+    (t/assert-equal
+      `{"done" false "tag" "ret" "val" "15"}`
+      `@{"done" false "tag" "sig" "val" "debug"}`))
+  (let [output @""]
+    (with-dyns [:out output :test/color? true]
+      (test-merge))
+    # The diff should not have small isolated segments like "e" or "d"
+    # that create confusing breaks in the coloring
+    (def out-str (string output))
+    # Check that "sig" is colored as one unit
+    (unless (string/find "\e[48;5;22msig\e[0m" out-str)
+      (error "Test failed: sig not colored properly"))
+    # Check that there are no weird breaks in the insert
+    (unless (not (string/find "\e[0me\"" out-str))
+      (error "Test failed: unexpected color break found"))))
+
+(test-diff-merge-islands)
+
+
+(t/reset-all!)
+
+(defn test-diff-immutable-structs []
+  # Test that diff works with immutable structs (not just mutable tables)
+  # This should not crash with "expected array, table or buffer" error
+  (t/deftest test-immutable
+    (t/assert-equal {:a 1 :b 2} {:a 1 :b 3}))
+  (let [output @""]
+    (with-dyns [:out output :test/color? true]
+      (test-immutable))
+    # If we get here without crashing, the test passes
+    (def expect (string "-----------------------------------\n"
+                        "> \e[31mFailed\e[0m: test-immutable\n"
+                        "Assertion: (= {:a 1 :b 2} {:a 1 :b 3})\n"
+                        "Expect (L): {:a 1 :b \e[48;5;52m2\e[0m}\n"
+                        "Actual (R): {:a 1 :b \e[48;5;22m3\e[0m}\n"))
+    (unless (= expect (string output))
+      (error "Test failed"))))
+
+(test-diff-immutable-structs)
+
+
+(t/reset-all!)
