@@ -1,3 +1,4 @@
-/build/
-/jpm_tree/
+.beans
+.beans.yml
 .DS_Store
+CLAUDE.md
