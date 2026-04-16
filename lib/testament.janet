@@ -436,7 +436,7 @@
 
 
 (defn- default-print-reports
-  [num-tests-run num-asserts num-tests-passed]
+  [_num-tests-run _num-asserts _num-tests-passed]
   (def s (stats))
   (print-results)
   (ruler s)
@@ -936,7 +936,7 @@
     (error "arity mismatch"))
   (let [[name body] (if (= :symbol (type (first args)))
                       [(first args) (slice args 1)]
-                      [(symbol "test" (gensym)) args])
+                      [(symbol "_test" (gensym)) args])
         nameg (gensym)
         namek (keyword name)]
     ~(def ,name
@@ -1052,10 +1052,9 @@
   (def env (curenv))
   (def kargs (table ;args))
   (def {:as as
-        :prefix pfx
-        :export ep} kargs)
+        :prefix pfx} kargs)
   (def newenv (require path ;args))
-  (each [k v] (pairs newenv)
+  (each v newenv
     (when (dictionary? v)
       (put v :private nil)))
   (def prefix (or

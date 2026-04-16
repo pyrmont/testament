@@ -20,10 +20,10 @@
 
 
 (defn test-deftest-same-name-macro []
-  (t/deftest same-name :noop)
+  (t/deftest _same-name :noop)
   (def err @"")
   (with-dyns [:err err]
-    (t/deftest same-name :noop)
+    (t/deftest _same-name :noop)
     (unless (= (string err) "[testament] registered multiple tests with the same name\n")
       (error "no warning"))))
 
@@ -209,15 +209,15 @@
 (t/reset-all!)
 
 (defn test-each-is-macro []
-  (t/deftest test-name (t/each-is [(= 1 1) (= 1 2)]))
-  (let [expect @[@{:test     'test-name
-                   :passes   @[{:test    'test-name
+  (t/deftest _test-name (t/each-is [(= 1 1) (= 1 2)]))
+  (let [expect @[@{:test     '_test-name
+                   :passes   @[{:test    '_test-name
                                 :kind    :equal
                                 :passed? true
                                 :expect  1
                                 :actual  1
                                 :note    "(= 1 1)"}]
-                   :failures @[{:test    'test-name
+                   :failures @[{:test    '_test-name
                                 :kind    :equal
                                 :passed? false
                                 :expect  1
@@ -233,10 +233,10 @@
 (t/reset-all!)
 
 (defn test-exit-code-success []
-  (t/deftest test-name (t/assert-equal 1 1))
-  (let [expect @[@{:test     'test-name
+  (t/deftest _test-name (t/assert-equal 1 1))
+  (let [expect @[@{:test     '_test-name
                    :failures @[]
-                   :passes   @[{:test    'test-name
+                   :passes   @[{:test    '_test-name
                                 :kind    :equal
                                 :passed? true
                                 :expect  1
@@ -252,10 +252,10 @@
 (t/reset-all!)
 
 (defn test-exit-code-failure []
-  (t/deftest test-name (t/assert-equal 1 2))
-  (let [expect @[@{:test     'test-name
+  (t/deftest _test-name (t/assert-equal 1 2))
+  (let [expect @[@{:test     '_test-name
                    :passes   @[]
-                   :failures @[{:test    'test-name
+                   :failures @[{:test    '_test-name
                                 :kind    :equal
                                 :passed? false
                                 :expect  1
@@ -271,7 +271,7 @@
 (t/reset-all!)
 
 (defn test-reporting []
-  (t/deftest test-name (t/assert-equal 1 1))
+  (t/deftest _test-name (t/assert-equal 1 1))
   (let [output @""
         stats  "1 tests run containing 1 assertions\n1 tests passed, 0 tests failed"
         len    (->> (string/split "\n" stats) (map length) splice max)
@@ -289,7 +289,7 @@
 (defn test-custom-reporting []
   (t/set-report-printer (fn [notests noasserts nopassed]
                           (print "CUSTOM:" notests ":" noasserts ":" nopassed ":")))
-  (t/deftest test-name (t/assert-equal 1 1))
+  (t/deftest _test-name (t/assert-equal 1 1))
   (let [output @""]
     (with-dyns [:out output]
       (t/run-tests! :silent? false :no-exit? true))
@@ -304,7 +304,7 @@
 (defn test-on-result-hook []
   (var called false)
   (t/set-on-result-hook (fn [summary]
-                          (unless (= summary {:test    'test-name
+                          (unless (= summary {:test    '_test-name
                                               :kind    :equal
                                               :passed? true
                                               :expect  1
@@ -312,7 +312,7 @@
                                               :note   "1"})
                             (error "Test failed"))
                           (set called true)))
-  (t/deftest test-name (t/assert-equal 1 1 "1"))
+  (t/deftest _test-name (t/assert-equal 1 1 "1"))
   (let [output @""]
     (with-dyns [:out output]
       (t/run-tests! :silent? false :no-exit? true))
@@ -325,7 +325,7 @@
 (t/reset-all!)
 
 (defn test-reporting-silent []
-  (t/deftest test-name (t/assert-equal 1 1))
+  (t/deftest _test-name (t/assert-equal 1 1))
   (let [output @""]
     (with-dyns [:out output]
       (t/run-tests! :silent? true :no-exit? true))
@@ -344,7 +344,7 @@
         rule   (string/repeat "=" len)]
     (with-dyns [:out output]
       (t/exercise! [:silent? false :no-exit? true]
-        (t/deftest test-name (t/assert-equal 1 1))))
+        (t/deftest _test-name (t/assert-equal 1 1))))
     (unless (= (string rule "\n" stats "\n" rule "\n") (string output))
       (error "Test failed"))))
 
@@ -357,7 +357,7 @@
   (let [output @""]
     (with-dyns [:out output]
       (t/exercise! [:silent? true :no-exit? true]
-        (t/deftest test-name (t/assert-equal 1 1))))
+        (t/deftest _test-name (t/assert-equal 1 1))))
     (unless (empty? (string output))
       (error "Test failed"))))
 
@@ -388,12 +388,12 @@
 (t/reset-all!)
 
 (defn test-call-tests []
-  (setdyn :test/tests ['test-name1])
-  (t/deftest test-name1 (t/assert-equal 1 1))
-  (t/deftest test-name2 (t/assert-equal 1 1))
-  (let [expect @[@{:test     'test-name1
+  (setdyn :test/tests ['_test-name1])
+  (t/deftest _test-name1 (t/assert-equal 1 1))
+  (t/deftest _test-name2 (t/assert-equal 1 1))
+  (let [expect @[@{:test     '_test-name1
                    :failures @[]
-                   :passes   @[{:test    'test-name1
+                   :passes   @[{:test    '_test-name1
                                 :kind    :equal
                                 :passed? true
                                 :expect  1
@@ -409,12 +409,12 @@
 (t/reset-all!)
 
 (defn test-skip-tests []
-  (setdyn :test/skips ['test-name2])
-  (t/deftest test-name1 (t/assert-equal 1 1))
-  (t/deftest test-name2 (t/assert-equal 1 1))
-  (let [expect @[@{:test     'test-name1
+  (setdyn :test/skips ['_test-name2])
+  (t/deftest _test-name1 (t/assert-equal 1 1))
+  (t/deftest _test-name2 (t/assert-equal 1 1))
+  (let [expect @[@{:test     '_test-name1
                    :failures @[]
-                   :passes   @[{:test    'test-name1
+                   :passes   @[{:test    '_test-name1
                                 :kind    :equal
                                 :passed? true
                                 :expect  1
