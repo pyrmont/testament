@@ -415,9 +415,9 @@
 
 
 (defn- default-print-results
-  [reports]
+  [test-reports]
   (def s (stats))
-  (each report reports
+  (each report test-reports
     (unless (empty? (report :failures))
       (ruler s "-")
       (print "> " (colour :red "Failed") ": " (report :test))
@@ -1074,7 +1074,6 @@
   subject the bindings to testing.
   ```
   [path & args]
-  (def path (string path))
   (def ps (partition 2 args))
   (def argm (mapcat (fn [[k v]] [k (if (= k :as) (string v) v)]) ps))
   (tuple review-1 (string path) ;argm))
