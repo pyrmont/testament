@@ -785,8 +785,9 @@
   [expect expr &opt note]
   (let [errsym   (keyword (gensym))
         sentinel (gensym)
-        actual   (gensym)]
-    ~(let [[,sentinel ,actual] (try (do ,expr [nil nil]) ([err] [,errsym err]))]
+        actual   (gensym)
+        err      (gensym)]
+    ~(let [[,sentinel ,actual] (try (do ,expr [nil nil]) ([,err] [,errsym ,err]))]
       (,assert-thrown-message* (and (= ,sentinel ,errsym) (= ,expect ,actual )) ',expr ,expect ',expect ,actual ,note))))
 
 
