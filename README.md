@@ -29,10 +29,26 @@ Testament can be used like this:
   (is (= 2 (+ 1 1)) "1 + 1 = 2"))
 
 (deftest two-plus-two
+  {:skip-when (= :windows (os/which))
+   :tags [:arithmetic]}
   (is (= 5 (+ 2 2)) "2 + 2 = 5"))
 
 (run-tests!)
 ```
+
+`deftest` accepts an optional metadata struct immediately after the test name.
+Metadata is retained for tooling, and a `:skip-when` form is evaluated when
+`run-tests!` considers the test. A truthy result omits the test from the run;
+false or nil allows it to run. Skipped tests are recorded in the returned
+reports with `:skipped? true`, but are excluded from test and assertion totals.
+When at least one test is skipped, the default summary appends the number of
+skipped tests to its second line. The form captures lexical bindings from
+where the test is declared. Calling the named test function directly always
+runs its body.
+
+A leading struct is metadata only when another form follows it. Consequently,
+`(deftest response {:status 200})` still has a struct as its sole test body. If
+a multi-expression body needs to begin with a struct, wrap the body in `do`.
 
 Put your tests in the `test/` directory within your project and then use a
 bundle manager like [Jeep][]:

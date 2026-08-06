@@ -379,10 +379,15 @@
 
 (defn- stats
   []
+  (def num-tests-skipped
+    (length (filter |($ :skipped?) (values reports))))
   (string num-tests-run " tests run containing "
           num-asserts " assertions\n"
           num-tests-passed " tests passed, "
-          (- num-tests-run num-tests-passed) " tests failed"))
+          (- num-tests-run num-tests-passed) " tests failed"
+          (if (pos? num-tests-skipped)
+            (string ", " num-tests-skipped " tests skipped")
+            "")))
 
 
 (defn- failure-message
@@ -511,15 +516,15 @@
 
 (defn- register-test
   ```
-  Registers a test `t` with a `name `in the test suite
+  Registers a test `t` with a `name` in the test suite
 
   This function will print a warning to `:err` if a test with the same `name`
   has already been registered in the test suite.
   ```
-  [name t]
+  [name t metadata]
   (unless (nil? (tests name))
     (eprint "[testament] registered multiple tests with the same name"))
-  (set (tests name) t))
+  (set (tests name) (merge @{:test t} metadata)))
 
 
 (defn- setup-test
@@ -540,6 +545,19 @@
   (if (-> (reports name) (get :failures) length zero?)
     (++ num-tests-passed))
   (set curr-test nil))
+
+
+(defn- run-test-entry
+  ```
+  Runs or records a registered test according to its skip predicate
+  ```
+  [name test-entry]
+  (if (and (test-entry :skip-when) ((test-entry :skip-when)))
+    (put reports name @{:test name
+                        :passes @[]
+                        :failures @[]
+                        :skipped? true})
+    ((test-entry :test))))
 
 
 ### Utility function
@@ -912,6 +930,20 @@
   the test. If a test with the same name has already been defined, `deftest`
   will print a warning.
 
+  An optional metadata struct may immediately follow the test name. It is
+  treated as metadata only when at least one form follows it as the test body.
+  This means a sole struct remains an ordinary one-expression test body. For
+  an anonymous test, the same rule is applied after Testament generates its
+  internal name.
+
+  Arbitrary metadata is retained in the test suite and attached to the global
+  binding created for a named test. If the metadata contains `:skip-when`, its
+  value is compiled into a zero-argument predicate in the lexical environment
+  where the test is declared. `run-tests!` evaluates that predicate when it
+  considers the test and omits the test when the result is truthy. Calling the
+  test function directly does not evaluate the predicate and always runs the
+  test body.
+
   A test is just a function. `args` (excluding the first argument if that
   argument is a symbol) is used as the body of the function. Testament adds
   respective calls to a setup function and a teardown function before and after
@@ -935,18 +967,25 @@
   (when (or (zero? (length args))
             (and (one? (length args)) (= :symbol (type (first args)))))
     (error "arity mismatch"))
-  (let [[name body] (if (= :symbol (type (first args)))
-                      [(first args) (slice args 1)]
-                      [(symbol "_test" (gensym)) args])
+  (let [[name forms] (if (= :symbol (type (first args)))
+                       [(first args) (slice args 1)]
+                       [(symbol "_test" (gensym)) args])
+        has-metadata? (and (> (length forms) 1) (struct? (first forms)))
+        meta-dict (if has-metadata? (first forms) {})
+        body (if has-metadata? (slice forms 1) forms)
+        meta (if (has-key? meta-dict :skip-when)
+               ~(merge @{} ',meta-dict
+                       {:skip-when (fn [] ,(meta-dict :skip-when))})
+               meta-dict)
         nameg (gensym)
         namek (keyword name)]
-    ~(def ,name
+    ~(def ,name ,meta-dict
        (do
          (def ,nameg (fn ,namek []
                           (,setup-test ',name)
                           ,;body
                           (,teardown-test ',name)))
-         (,register-test ',name ,nameg)
+         (,register-test ',name ,nameg ,meta)
          (fn ,namek [&named silent?]
            (,nameg)
            (unless silent?
@@ -977,32 +1016,38 @@
 
   If `:no-exit?` is set to `true`, the `run-tests!` function returns an indexed
   collection of test reports. Each report in the collection is a dictionary
-  collection containing three keys: `:test`, `:passes` and `:failures`. `:test`
-  is the name of the test while `:passes` and `:failures` contain the results
-  of each respective passed and failed assertion. Each result is a data
+  collection containing `:test`, `:passes` and `:failures`. `:test` is the name
+  of the test while `:passes` and `:failures` contain the results of each
+  respective passed and failed assertion. A skipped test also contains
+  `:skipped?` set to `true`, with empty pass and failure collections, and is
+  omitted from the test and assertion totals. Each assertion result is a data
   structure of the kind described in the docstring for `set-on-result-hook`.
 
   A user can specify tests to run or skip using the `:test/tests` and
   `:test/skips` dynamic bindings. Each should be an array/tuple that contains
-  symbols matching the names of the tests to run or skip.
+  symbols matching the names of the tests to run or skip. Name selection is
+  applied before the `:skip-when` predicate in a test's metadata. A selected
+  test is omitted when that predicate returns a truthy value; false and nil
+  results allow it to run, and predicate errors propagate. When any tests are
+  skipped, the default summary appends their count to its second line.
 
   Finally, if the dynamic binding `:testament/repl?` is set to `true`, this
   will also reset the test reports and empty the module/cache to provide a
   fresh run with the most up-to-date code.
   ```
   [&named no-exit? silent?]
-  (each [name test] (pairs tests)
+  (each [name test-entry] (pairs tests)
     (cond
       # if specific tests to run, run test if specified
       (dyn :test/tests)
       (when (has-value? (dyn :test/tests) name)
-        (test))
+        (run-test-entry name test-entry))
       # if specific tests to skip, run test unless specified
       (dyn :test/skips)
       (unless (has-value? (dyn :test/skips) name)
-        (test))
+        (run-test-entry name test-entry))
       # otherwise always run test
-      (test)))
+      (run-test-entry name test-entry)))
   # print reports
   (unless silent?
     (print-reports))

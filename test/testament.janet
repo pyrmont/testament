@@ -1,4 +1,5 @@
 (import ../lib/testament :as t :exit true)
+(t/review ../lib/testament :as ti)
 
 (setdyn :test/color? false)
 
@@ -36,6 +37,36 @@
     (error "Test failed")))
 
 (test-anon-deftest-macro)
+
+
+# These definitions are at module scope so their binding metadata is retained.
+(t/deftest _sole-struct-body {:status 200})
+(unless (and (not (has-key? (dyn '_sole-struct-body) :status))
+             (not (has-key? (ti/tests '_sole-struct-body) :status)))
+  (error "A sole struct was treated as metadata"))
+
+(t/deftest _test-with-metadata
+  {:skip-when false
+   :tags [:http :unit]}
+  :noop)
+(unless (and (= false (get (dyn '_test-with-metadata) :skip-when))
+             (deep= [:http :unit] (get (dyn '_test-with-metadata) :tags))
+             (deep= [:http :unit]
+                    (get-in ti/tests ['_test-with-metadata :tags]))
+             (= :function
+                (type (get-in ti/tests ['_test-with-metadata :skip-when]))))
+  (error "Test metadata was not retained"))
+
+(t/reset-all!)
+
+
+(defn test-anon-deftest-metadata []
+  (t/deftest {:tags [:anonymous]} :noop)
+  (def test-entry (first (values ti/tests)))
+  (unless (deep= [:anonymous] (test-entry :tags))
+    (error "Anonymous test metadata was not retained")))
+
+(test-anon-deftest-metadata)
 
 
 (defn test-assert-expr-macro []
@@ -388,7 +419,6 @@
 (t/reset-all!)
 
 (defn test-call-tests []
-  (setdyn :test/tests ['_test-name1])
   (t/deftest _test-name1 (t/assert-equal 1 1))
   (t/deftest _test-name2 (t/assert-equal 1 1))
   (let [expect @[@{:test     '_test-name1
@@ -399,7 +429,8 @@
                                 :expect  1
                                 :actual  1
                                 :note    "(= 1 1)"}]}]
-        actual (t/run-tests! :silent? true :no-exit? true)]
+        actual (with-dyns [:test/tests ['_test-name1]]
+                 (t/run-tests! :silent? true :no-exit? true))]
     (unless (deep= expect actual)
       (error "Test failed"))))
 
@@ -409,7 +440,6 @@
 (t/reset-all!)
 
 (defn test-skip-tests []
-  (setdyn :test/skips ['_test-name2])
   (t/deftest _test-name1 (t/assert-equal 1 1))
   (t/deftest _test-name2 (t/assert-equal 1 1))
   (let [expect @[@{:test     '_test-name1
@@ -420,11 +450,162 @@
                                 :expect  1
                                 :actual  1
                                 :note    "(= 1 1)"}]}]
-        actual (t/run-tests! :silent? true :no-exit? true)]
+        actual (with-dyns [:test/skips ['_test-name2]]
+                 (t/run-tests! :silent? true :no-exit? true))]
     (unless (deep= expect actual)
       (error "Test failed"))))
 
 (test-skip-tests)
+
+
+(t/reset-all!)
+
+(defn test-skip-when-false-or-nil []
+  (var calls 0)
+  (t/deftest _false-skip
+    {:skip-when false}
+    (++ calls))
+  (t/deftest _nil-skip
+    {:skip-when nil}
+    (++ calls))
+  (def results
+    (with-dyns [:test/tests nil :test/skips nil]
+      (t/run-tests! :silent? true :no-exit? true)))
+  (unless (and (= 2 calls) (= 2 (length results)))
+    (errorf "False or nil skip conditions prevented a test from running: %v calls, %v results"
+            calls results)))
+
+(test-skip-when-false-or-nil)
+
+
+(t/reset-all!)
+
+(defn test-skip-when-truthy []
+  (var calls 0)
+  (t/deftest _truthy-skip
+    {:skip-when :skip}
+    (++ calls))
+  (def results
+    (with-dyns [:test/tests nil :test/skips nil]
+      (t/run-tests! :silent? true :no-exit? true)))
+  (def expected @[@{:test '_truthy-skip
+                    :passes @[]
+                    :failures @[]
+                    :skipped? true}])
+  (unless (and (zero? calls) (deep= expected results))
+    (error "A truthy skip condition did not prevent a test from running")))
+
+(test-skip-when-truthy)
+
+
+(t/reset-all!)
+
+(defn test-skipped-test-reporting []
+  (t/deftest _reported-skip {:skip-when true} :noop)
+  (def output @"")
+  (with-dyns [:out output :test/tests nil :test/skips nil]
+    (t/run-tests! :silent? false :no-exit? true))
+  (def stats (string "0 tests run containing 0 assertions\n"
+                     "0 tests passed, 0 tests failed, 1 tests skipped"))
+  (def len (->> (string/split "\n" stats) (map length) splice max))
+  (def rule (string/repeat "=" len))
+  (def expected (string rule "\n" stats "\n" rule "\n"))
+  (unless (= expected (string output))
+    (error "Skipped test count was not printed")))
+
+(test-skipped-test-reporting)
+
+
+(t/reset-all!)
+
+(defn test-skip-when-evaluated-at-run-time []
+  (var skip? false)
+  (var calls 0)
+  (t/deftest _late-skip
+    {:skip-when skip?}
+    (++ calls))
+  (set skip? true)
+  (def results
+    (with-dyns [:test/tests nil :test/skips nil]
+      (t/run-tests! :silent? true :no-exit? true)))
+  (def expected @[@{:test '_late-skip
+                    :passes @[]
+                    :failures @[]
+                    :skipped? true}])
+  (unless (and (zero? calls) (deep= expected results))
+    (error "The skip condition was not evaluated in its declaring environment at run time")))
+
+(test-skip-when-evaluated-at-run-time)
+
+
+(t/reset-all!)
+
+(defn test-direct-call-ignores-skip-when []
+  (var calls 0)
+  (t/deftest _direct-call
+    {:skip-when true}
+    (++ calls))
+  (_direct-call :silent? true)
+  (unless (= 1 calls)
+    (error "A skip condition prevented direct test invocation")))
+
+(test-direct-call-ignores-skip-when)
+
+
+(t/reset-all!)
+
+(defn test-selected-test-still-obeys-skip-when []
+  (var calls 0)
+  (t/deftest _selected-skip
+    {:skip-when true}
+    (++ calls))
+  (t/deftest _not-selected (++ calls))
+  (def results
+    (with-dyns [:test/tests ['_selected-skip] :test/skips nil]
+      (t/run-tests! :silent? true :no-exit? true)))
+  (def expected @[@{:test '_selected-skip
+                    :passes @[]
+                    :failures @[]
+                    :skipped? true}])
+  (unless (and (zero? calls) (deep= expected results))
+    (error "Explicit selection bypassed a skip condition")))
+
+(test-selected-test-still-obeys-skip-when)
+
+
+(t/reset-all!)
+
+(defn test-skip-when-error-propagates []
+  (t/deftest _skip-error
+    {:skip-when (error "skip predicate failed")}
+    :noop)
+  (def message (try
+                 (do
+                   (with-dyns [:test/tests nil :test/skips nil]
+                     (t/run-tests! :silent? true :no-exit? true))
+                   nil)
+                 ([err] err)))
+  (unless (= "skip predicate failed" message)
+    (error "A skip predicate error did not propagate")))
+
+(test-skip-when-error-propagates)
+
+
+(t/reset-all!)
+
+(defn test-reset-clears-test-metadata []
+  (t/deftest _reset-metadata {:tags [:temporary]} :noop)
+  (unless (deep= [:temporary] (get-in ti/tests ['_reset-metadata :tags]))
+    (error "Test metadata was not registered"))
+  (t/reset-tests!)
+  (unless (empty? ti/tests)
+    (error "reset-tests! did not clear the test registry"))
+  (t/deftest _reset-all-metadata {:tags [:temporary]} :noop)
+  (t/reset-all!)
+  (unless (empty? ti/tests)
+    (error "reset-all! did not clear the test registry")))
+
+(test-reset-clears-test-metadata)
 
 
 (t/reset-all!)
